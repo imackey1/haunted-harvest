@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The Haunted Harvest | Monsters' City Street</title>
+  <meta name="description" content="A CSS-only Halloween experience: three animated scenes of Monsters' City, built with pure HTML5 and CSS3. No JavaScript.">
+  <meta name="theme-color" content="#1A1423">
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="haunted-harvest.css">
+</head>
+<body>
+  <a class="skip-link" href="#scenes">Skip to the scenes</a>
+
+  <!-- ===== Shared SVG art (symbols = static artwork; moving parts are inline so CSS can animate them) ===== -->
+  <svg class="sprite-defs" width="0" height="0" aria-hidden="true" focusable="false">
+    <defs>
+      <linearGradient id="beam" x1="0" x2="1" y1="0" y2="0">
+        <stop offset="0" stop-color="#FFD60A" stop-opacity=".8"/>
+        <stop offset="1" stop-color="#FFD60A" stop-opacity="0"/>
+      </linearGradient>
+    </defs>
+
+    <!-- Costumed bodies. viewBox 40x90; legs are drawn inline per figure so they can swing. -->
+    <symbol id="b-witch" viewBox="0 0 40 90">
+      <path class="pl" d="M20 32 L35 68 Q20 72 5 68 Z"/>
+      <path class="k-pk" d="M5 68 Q20 72 35 68" fill="none" stroke-width="3"/>
+      <path class="k-pl" d="M14 36 L8 52 M26 36 L32 52" fill="none" stroke-width="5" stroke-linecap="round"/>
+      <circle class="s1" cx="8" cy="53" r="3"/>
+      <circle class="s1" cx="32" cy="53" r="3"/>
+      <path class="pk" d="M30 53 q4 -2 8 0 l-1.5 9 h-5 z"/>
+      <circle class="s1" cx="20" cy="22" r="8.5"/>
+      <path class="bk" d="M3 18 Q20 13 37 18 Q20 21 3 18Z"/>
+      <path class="bk" d="M12 16 L22 0 L28 16Z"/>
+      <rect class="cg" x="12.5" y="12" width="15" height="3"/>
+      <circle class="bk" cx="17" cy="23" r="1.2"/>
+      <circle class="bk" cx="23" cy="23" r="1.2"/>
+      <path class="k-bk" d="M17 27 Q20 29.5 23 27" fill="none" stroke-width="1"/>
+    </symbol>
+
+    <symbol id="b-vampire" viewBox="0 0 40 90">
+      <path class="pu" d="M10 32 Q0 58 1 74 Q20 70 39 74 Q40 58 30 32 Z"/>
+      <path class="rd" d="M12 34 L6 72 Q20 69 34 72 L28 34 Z"/>
+      <path class="bk" d="M13 34 L27 34 L30 66 H10 Z"/>
+      <path class="gh" d="M17 34 L20 52 L23 34Z"/>
+      <path class="k-bk" d="M13 38 L7 56 M27 38 L33 56" fill="none" stroke-width="5" stroke-linecap="round"/>
+      <circle class="s4" cx="7" cy="57" r="3"/>
+      <circle class="s4" cx="33" cy="57" r="3"/>
+      <path class="bk" d="M11 32 L16 40 L20 34 L24 40 L29 32 L29 27 L11 27 Z"/>
+      <circle class="s4" cx="20" cy="21" r="8.5"/>
+      <path class="bk" d="M11 20 Q12 9 20 10 Q28 9 29 20 Q24 14 20 17 Q16 14 11 20Z"/>
+      <circle class="rd" cx="17" cy="22" r="1.3"/>
+      <circle class="rd" cx="23" cy="22" r="1.3"/>
+      <path class="gh" d="M17.5 26.5 L18.7 29.5 L19.8 26.5Z M20.2 26.5 L21.3 29.5 L22.5 26.5Z"/>
+      <path class="pk" d="M31 55 h9 l-1.5 9 h-6 z"/>
+    </symbol>
+
+    <symbol id="b-ghost" viewBox="0 0 40 90">
+      <path class="gh" d="M20 7 C8 7 6 26 6 40 L3 71 Q7 75 10.5 71 Q14 75 17.5 71 Q21 75 24.5 71 Q28 75 31 71 L37 71 L34 40 C34 26 32 7 20 7Z"/>
+      <ellipse class="bk" cx="15" cy="24" rx="2.2" ry="3.4"/>
+      <ellipse class="bk" cx="25" cy="24" rx="2.2" ry="3.4"/>
+      <ellipse class="bk" cx="20" cy="33" rx="2.6" ry="3.2"/>
+      <circle class="pk" cx="35" cy="58" r="4.5"/>
+      <rect class="sl" x="34" y="52" width="2" height="3"/>
+    </symbol>
+
+    <symbol id="b-zombie" viewBox="0 0 40 90">
+      <path class="pu" d="M11 33 H29 L31 66 L28 62 L25 66 L21 62 L17 66 L13 62 L9 66 Z"/>
+      <path class="k-sl" d="M14 38 L37 41 M26 38 L38 36" fill="none" stroke-width="5" stroke-linecap="round"/>
+      <circle class="sl" cx="38" cy="41" r="3"/>
+      <circle class="sl" cx="39" cy="36" r="3"/>
+      <circle class="sl" cx="20" cy="22" r="8.5"/>
+      <path class="bk" d="M11 19 L13 10 L16 15 L19 8 L22 14 L26 9 L28 16 L29 19 Q20 13 11 19Z"/>
+      <ellipse class="gh" cx="16.5" cy="22" rx="3" ry="3.4"/>
+      <circle class="bk" cx="17.3" cy="22.4" r="1.2"/>
+      <circle class="bk" cx="24" cy="22.5" r="1.3"/>
+      <path class="k-bk" d="M15 29 H25 M17 28 v3 M20 28 v3 M23 28 v3" fill="none" stroke-width="1"/>
+    </symbol>
+
+    <!-- Static cat (sitting). Tail and eyes are inline on every instance so they can animate. -->
+    <symbol id="cat-sit" viewBox="0 0 60 60">
+      <ellipse class="bk" cx="26" cy="44" rx="15" ry="14"/>
+      <circle class="bk" cx="28" cy="22" r="11"/>
+      <path class="bk" d="M18 17 L19 3 L28 12Z M38 17 L38 3 L29 12Z"/>
+      <path class="bk" d="M14 56 q10 4 24 0 v3 h-24z"/>
+    </symbol>
+  </svg>
+
+  <div class="app">
+    <header class="site-header">
+      <p class="eyebrow">Monsters' City &middot; Halloween Night</p>
+      <h1>The Haunted Harvest</h1>
+      <p class="tagline">Three living scenes. Pure HTML5 + CSS3. Not one line of JavaScript.</p>
+    </header>
+
+    <nav class="scene-nav" aria-label="Choose a scene">
+      <ul>
+        <li><a class="nav-street" href="#street">Main Street</a></li>
+        <li><a class="nav-boutique" href="#boutique">Costume Boutique</a></li>
+        <li><a class="nav-rooftops" href="#rooftops">Rooftops</a></li>
+      </ul>
+    </nav>
+
+    <div class="controls">
+      <fieldset>
+        <legend>Effects</legend>
+        <div class="switch">
+          <input type="checkbox" id="t-mist" class="switch-input">
+          <label for="t-mist">Thicker mist</label>
+        </div>
+        <div class="switch">
+          <input type="checkbox" id="t-confetti" class="switch-input">
+          <label for="t-confetti">Candy confetti</label>
+        </div>
+        <div class="switch">
+          <input type="checkbox" id="t-glow" class="switch-input">
+          <label for="t-glow">Candle glow</label>
+        </div>
+      </fieldset>
+    </div>
+
+    <main id="scenes" class="scenes" tabindex="-1">
+
+      <!-- ===================================================== -->
+      <!-- SCENE 1 : MAIN STREET                                 -->
+      <!-- ===================================================== -->
+      <section class="scene" id="street" aria-labelledby="street-title">
+        <div class="scene-head">
+          <h2 id="street-title">Main Street</h2>
+          <p>Trick-or-treat hour. A hearse rolls past, a cat watches from the fence, and the fog is creeping in.</p>
+        </div>
+
+        <div class="stage-frame">
+          <div class="stage stage-street" role="group" aria-label="Animated scene: costumed kids and a zombie walk along a foggy street while a hearse drives by, bats cross the moon, and a black cat watches from a fence.">
+            <div class="sky"></div>
+            <div class="stars"></div>
+            <div class="moon"></div>
+            <div class="skyline"></div>
+            <div class="skyline-lights"></div>
+
+            <!-- Costume shop (left) -->
+            <div class="bldg bldg-shop">
+              <div class="bldg-windows"></div>
+              <div class="awning"></div>
+              <div class="lantern-rope"><span class="paper-lantern"></span></div>
+              <a class="door" href="#boutique">
+                <span class="door-sign">Costume Boutique</span>
+                <span class="door-glass"></span>
+                <span class="visually-hidden">Enter the Costume Boutique scene</span>
+              </a>
+            </div>
+
+            <!-- House with roof access (right) -->
+            <div class="bldg bldg-house">
+              <div class="bldg-windows"></div>
+              <a class="ladder" href="#rooftops">
+                <span class="ladder-sign">Roof Access</span>
+                <span class="visually-hidden">Climb to the Rooftops scene</span>
+              </a>
+            </div>
+            <div class="fence"></div>
+
+            <!-- Street lamps -->
+            <div class="lamp" style="--x:40%"><span class="lamp-head"></span></div>
+            <div class="lamp lamp-b" style="--x:66%"><span class="lamp-head"></span></div>
+
+            <div class="sidewalk"></div>
+            <div class="road"></div>
+
+            <!-- Cat on the fence -->
+            <div class="sprite cat-wrap" style="--x:80%;--y:25%;--w:12">
+              <svg class="cat" viewBox="0 0 60 60" aria-hidden="true" focusable="false">
+                <path class="tail" d="M40 54 C54 54 58 40 52 32" fill="none" stroke-width="5" stroke-linecap="round"/>
+                <use href="#cat-sit"/>
+                <g class="eyes"><ellipse class="cg" cx="23.5" cy="21" rx="2.4" ry="3.2"/><ellipse class="cg" cx="33" cy="21" rx="2.4" ry="3.2"/></g>
+              </svg>
+            </div>
+
+            <!-- Jack-o'-lanterns (focusable toggles) -->
+            <div class="props">
+              <input type="checkbox" id="lit-street-1" class="lantern-check">
+              <label class="lantern" for="lit-street-1" style="--x:35%;--y:21%;--w:9">
+                <svg viewBox="0 0 60 56" aria-hidden="true" focusable="false">
+                  <ellipse class="pk" cx="30" cy="32" rx="27" ry="21"/>
+                  <ellipse class="pk-dark" cx="30" cy="32" rx="13" ry="21"/>
+                  <rect class="sl" x="27" y="6" width="6" height="9" rx="2"/>
+                  <g class="face"><path d="M16 26 L24 26 L20 34Z M36 26 L44 26 L40 34Z M17 40 Q30 52 43 40 L39 38 L35 42 L30 38 L25 42 L21 38Z"/></g>
+                </svg>
+                <span class="visually-hidden">Light the jack-o'-lantern</span>
+              </label>
+              <input type="checkbox" id="lit-street-2" class="lantern-check">
+              <label class="lantern" for="lit-street-2" style="--x:58%;--y:21%;--w:7">
+                <svg viewBox="0 0 60 56" aria-hidden="true" focusable="false">
+                  <ellipse class="pk" cx="30" cy="32" rx="27" ry="21"/>
+                  <ellipse class="pk-dark" cx="30" cy="32" rx="13" ry="21"/>
+                  <rect class="sl" x="27" y="6" width="6" height="9" rx="2"/>
+                  <g class="face"><path d="M16 26 L24 26 L20 34Z M36 26 L44 26 L40 34Z M17 40 Q30 52 43 40 L39 38 L35 42 L30 38 L25 42 L21 38Z"/></g>
+                </svg>
+                <span class="visually-hidden">Light the second jack-o'-lantern</span>
+              </label>
+            </div>
+
+            <!-- Trick-or-treaters (humans) heading right -->
+            <div class="sprite walker" style="--x:20%;--y:15%;--w:12;--dur:34s;--delay:-9.6s">
+              <svg class="fig" viewBox="0 0 40 90" aria-hidden="true" focusable="false">
+                <rect class="leg a" x="12" y="62" width="7" height="26" rx="3.5"/><rect class="leg b" x="21" y="62" width="7" height="26" rx="3.5"/>
+                <use href="#b-witch"/>
+              </svg>
+            </div>
+            <!-- costumed dog trots just ahead of the witch -->
+            <div class="sprite walker dog-walker" style="--x:30%;--y:14%;--w:10;--dur:34s;--delay:-12.2s">
+              <svg class="fig dog" viewBox="0 0 60 40" aria-hidden="true" focusable="false">
+                <rect class="leg a" x="12" y="26" width="5" height="13" rx="2.5"/><rect class="leg b" x="19" y="26" width="5" height="13" rx="2.5"/>
+                <rect class="leg b" x="39" y="26" width="5" height="13" rx="2.5"/><rect class="leg a" x="46" y="26" width="5" height="13" rx="2.5"/>
+                <path class="tail-dog" d="M12 18 Q4 12 6 4" fill="none" stroke-width="4" stroke-linecap="round"/>
+                <ellipse class="s3" cx="30" cy="22" rx="19" ry="9"/>
+                <ellipse class="pk" cx="30" cy="22" rx="13" ry="8"/>
+                <path class="k-sl" d="M30 14 V30" fill="none" stroke-width="1.5"/>
+                <circle class="s3" cx="50" cy="15" r="7.5"/>
+                <path class="bk" d="M44 9 Q41 18 45 20 Z"/>
+                <ellipse class="s4" cx="56" cy="18" rx="4" ry="3"/>
+                <circle class="bk" cx="58.5" cy="17" r="1.3"/>
+                <circle class="bk" cx="51" cy="13" r="1.3"/>
+              </svg>
+            </div>
+            <div class="sprite walker" style="--x:62%;--y:15.5%;--w:11;--dur:40s;--delay:-25s">
+              <svg class="fig" viewBox="0 0 40 90" aria-hidden="true" focusable="false">
+                <rect class="leg a" x="12" y="62" width="7" height="26" rx="3.5"/><rect class="leg b" x="21" y="62" width="7" height="26" rx="3.5"/>
+                <use href="#b-vampire"/>
+              </svg>
+            </div>
+            <!-- heading left -->
+            <div class="sprite walker rtl" style="--x:46%;--y:14.5%;--w:11.5;--dur:30s;--delay:-15s">
+              <svg class="fig" viewBox="0 0 40 90" aria-hidden="true" focusable="false">
+                <rect class="leg a" x="12" y="62" width="7" height="26" rx="3.5"/><rect class="leg b" x="21" y="62" width="7" height="26" rx="3.5"/>
+                <use href="#b-ghost"/>
+              </svg>
+            </div>
+            <div class="sprite walker rtl zombie" style="--x:82%;--y:13%;--w:14;--dur:46s;--delay:-10s">
+              <svg class="fig" viewBox="0 0 40 90" aria-hidden="true" focusable="false">
+                <rect class="leg a" x="12" y="62" width="7" height="26" rx="3.5"/><rect class="leg b" x="21" y="62" width="7" height="26" rx="3.5"/>
+                <use href="#b-zombie"/>
+              </svg>
+            </div>
+
+            <!-- Hearse (vehicle) -->
+            <div class="sprite vehicle hearse" style="--x:36%;--y:1.5%;--w:30;--dur:16s;--delay:-7.8s">
+              <svg viewBox="0 0 180 64" aria-hidden="true" focusable="false">
+                <polygon points="170,40 270,18 270,62 170,48" fill="url(#beam)" class="headbeam"/>
+                <g class="hearse-body">
+                  <path class="bk" d="M4 48 V30 Q4 26 8 25 L46 22 L58 8 H136 Q144 8 148 18 L154 30 Q172 32 174 42 V50 H4 Z"/>
+                  <path class="nv" d="M60 12 H84 V28 H50 Z"/>
+                  <rect class="pu" x="92" y="12" width="46" height="16" rx="2"/>
+                  <path class="gh coffin" d="M105 15 L112 13 L124 13 L131 15 L128 25 L108 25Z" opacity=".85"/>
+                  <ellipse class="pk" cx="118" cy="7" rx="9" ry="6"/>
+                  <rect class="sl" x="117" y="0" width="3" height="3"/>
+                  <rect class="pl" x="4" y="38" width="170" height="3"/>
+                  <ellipse class="cg headlight" cx="170" cy="40" rx="4" ry="3"/>
+                  <rect class="rd" x="2" y="36" width="4" height="6"/>
+                </g>
+                <g class="wheel"><circle class="bk" cx="42" cy="50" r="12"/><circle class="gh" cx="42" cy="50" r="7"/><path class="k-bk" d="M42 43 V57 M35 50 H49" stroke-width="2.5"/></g>
+                <g class="wheel"><circle class="bk" cx="140" cy="50" r="12"/><circle class="gh" cx="140" cy="50" r="7"/><path class="k-bk" d="M140 43 V57 M133 50 H147" stroke-width="2.5"/></g>
+              </svg>
+            </div>
+
+            <!-- Bats in the sky -->
+            <div class="bat-fly" style="--x:16%;--y:70%;--w:7;--dur:18s;--delay:-4s">
+              <svg class="bat" viewBox="0 0 60 30" aria-hidden="true" focusable="false"><path class="wing bk" d="M30 14 C22 2 10 4 1 10 C8 10 10 15 12 21 C16 15 20 17 24 23 C26 19 28 16 30 14Z"/><path class="wing bk" d="M30 14 C38 2 50 4 59 10 C52 10 50 15 48 21 C44 15 40 17 36 23 C34 19 32 16 30 14Z"/><ellipse class="bk" cx="30" cy="15" rx="4" ry="6"/></svg>
+            </div>
+            <div class="bat-fly rev" style="--x:52%;--y:60%;--w:5;--dur:24s;--delay:-14s">
+              <svg class="bat" viewBox="0 0 60 30" aria-hidden="true" focusable="false"><path class="wing bk" d="M30 14 C22 2 10 4 1 10 C8 10 10 15 12 21 C16 15 20 17 24 23 C26 19 28 16 30 14Z"/><path class="wing bk" d="M30 14 C38 2 50 4 59 10 C52 10 50 15 48 21 C44 15 40 17 36 23 C34 19 32 16 30 14Z"/><ellipse class="bk" cx="30" cy="15" rx="4" ry="6"/></svg>
+            </div>
+            <div class="bat-fly" style="--x:76%;--y:78%;--w:4.5;--dur:21s;--delay:-9s">
+              <svg class="bat" viewBox="0 0 60 30" aria-hidden="true" focusable="false"><path class="wing bk" d="M30 14 C22 2 10 4 1 10 C8 10 10 15 12 21 C16 15 20 17 24 23 C26 19 28 16 30 14Z"/><path class="wing bk" d="M30 14 C38 2 50 4 59 10 C52 10 50 15 48 21 C44 15 40 17 36 23 C34 19 32 16 30 14Z"/><ellipse class="bk" cx="30" cy="15" rx="4" ry="6"/></svg>
+            </div>
+
+            <!-- Weather: wind-blown leaves + fog -->
+            <div class="leaves" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+            <div class="fog fog-back"></div>
+            <div class="fog fog-front"></div>
+            <div class="fog fog-extra"></div>
+            <div class="confetti"></div>
+          </div>
+        </div>
+
+        <details class="scene-guide">
+          <summary>What is happening on Main Street?</summary>
+          <ul>
+            <li><strong>People:</strong> a witch, a vampire and a sheet-ghost go trick-or-treating while a zombie shuffles the other way.</li>
+            <li><strong>Animals:</strong> a black cat blinks on the fence, a dog in a pumpkin vest trots beside the witch, bats flap across the moon.</li>
+            <li><strong>Weather:</strong> low fog drifts through the street and windblown leaves tumble past.</li>
+            <li><strong>Vehicle and objects:</strong> a hearse with spinning wheels and glowing headlights; a paper lantern swings from the shop awning.</li>
+            <li><strong>Halloween:</strong> jack-o'-lanterns you can light (press them or tab to them), a full moon, and flickering windows.</li>
+          </ul>
+        </details>
+      </section>
+
+      <!-- ===================================================== -->
+      <!-- SCENE 2 : COSTUME BOUTIQUE                            -->
+      <!-- ===================================================== -->
+      <section class="scene" id="boutique" aria-labelledby="boutique-title">
+        <div class="scene-head">
+          <h2 id="boutique-title">Costume Boutique</h2>
+          <p>Inside the shop, a storm taps the window while customers try on their monster looks.</p>
+        </div>
+
+        <div class="stage-frame">
+          <div class="stage stage-boutique" role="group" aria-label="Animated scene inside a costume shop: a shopkeeper waves from behind the counter, customers walk the floor, a cat and a spider move about, rain streaks the window and a taxi passes outside.">
+            <div class="wall"></div>
+            <div class="beam-ceiling"></div>
+
+            <!-- Window onto the stormy street -->
+            <div class="shop-window">
+              <div class="window-view">
+                <div class="win-lamp"></div>
+                <div class="win-taxi"><span class="taxi-light"></span></div>
+                <div class="rain rain-a"></div>
+                <div class="rain rain-b"></div>
+                <div class="win-flash"></div>
+              </div>
+              <div class="window-cross"></div>
+              <div class="window-sill"></div>
+            </div>
+
+            <!-- Door back to the street -->
+            <a class="shop-door" href="#street">
+              <span class="shop-door-sign">Back to Main Street</span>
+              <span class="visually-hidden">Return to the Main Street scene</span>
+            </a>
+
+            <!-- Roof hatch -->
+            <a class="hatch" href="#rooftops">
+              <span class="hatch-sign">Roof hatch</span>
+              <span class="hatch-cord"></span>
+              <span class="visually-hidden">Climb up to the Rooftops scene</span>
+            </a>
+
+            <!-- String lights -->
+            <svg class="string-lights" viewBox="0 0 100 12" aria-hidden="true" focusable="false">
+              <path class="k-bk" d="M0 1 Q25 11 50 3 T100 2" fill="none" stroke-width=".5"/>
+              <circle class="bulb cg" cx="8" cy="4.4" r="0.95"/>
+              <circle class="bulb pk" cx="19" cy="6.3" r="0.95"/>
+              <circle class="bulb sl" cx="31" cy="7.2" r="0.95"/>
+              <circle class="bulb cg" cx="42" cy="5.6" r="0.95"/>
+              <circle class="bulb pk" cx="54" cy="3.9" r="0.95"/>
+              <circle class="bulb sl" cx="66" cy="4.4" r="0.95"/>
+              <circle class="bulb cg" cx="78" cy="4.8" r="0.95"/>
+              <circle class="bulb pk" cx="90" cy="2.5" r="0.95"/>
+            </svg>
+
+            <!-- Ceiling fan (object in motion) -->
+            <div class="fan"><span class="fan-rod"></span>
+              <div class="fan-tilt"><svg class="fan-blades" viewBox="0 0 100 100" aria-hidden="true" focusable="false">
+                <ellipse class="pu" cx="50" cy="22" rx="9" ry="22"/>
+                <ellipse class="pu" cx="50" cy="22" rx="9" ry="22" transform="rotate(90 50 50)"/>
+                <ellipse class="pl" cx="50" cy="22" rx="9" ry="22" transform="rotate(180 50 50)"/>
+                <ellipse class="pl" cx="50" cy="22" rx="9" ry="22" transform="rotate(270 50 50)"/>
+                <circle class="pk" cx="50" cy="50" r="9"/>
+              </svg></div>
+            </div>
+
+            <!-- Hanging bats -->
+            <div class="hang-bat" style="--x:30%;--w:5"><svg viewBox="0 0 60 40" aria-hidden="true" focusable="false"><rect class="bk" x="29" y="0" width="2" height="6"/><ellipse class="bk" cx="30" cy="17" rx="7" ry="11"/><path class="wing bk" d="M23 12 Q8 12 6 34 Q14 26 23 28Z"/><path class="wing bk" d="M37 12 Q52 12 54 34 Q46 26 37 28Z"/><circle class="cg" cx="27.5" cy="24" r="1.3"/><circle class="cg" cx="32.5" cy="24" r="1.3"/></svg></div>
+            <div class="hang-bat late" style="--x:36%;--w:4"><svg viewBox="0 0 60 40" aria-hidden="true" focusable="false"><rect class="bk" x="29" y="0" width="2" height="6"/><ellipse class="bk" cx="30" cy="17" rx="7" ry="11"/><path class="wing bk" d="M23 12 Q8 12 6 34 Q14 26 23 28Z"/><path class="wing bk" d="M37 12 Q52 12 54 34 Q46 26 37 28Z"/><circle class="cg" cx="27.5" cy="24" r="1.3"/><circle class="cg" cx="32.5" cy="24" r="1.3"/></svg></div>
+
+            <!-- Spider on a thread -->
+            <div class="spider-drop" style="--x:63.5%">
+              <span class="thread"></span>
+              <svg class="spider" viewBox="0 0 40 30" aria-hidden="true" focusable="false">
+                <g class="k-bk" fill="none" stroke-width="2" stroke-linecap="round"><path d="M14 14 L4 6 L1 14 M14 16 L3 18 L2 26 M26 14 L36 6 L39 14 M26 16 L37 18 L38 26"/></g>
+                <ellipse class="bk" cx="20" cy="17" rx="8" ry="7"/><circle class="bk" cx="20" cy="9" r="4.5"/>
+                <circle class="rd" cx="18.2" cy="8.4" r="1"/><circle class="rd" cx="21.8" cy="8.4" r="1"/>
+              </svg>
+            </div>
+
+            <!-- Costume rack on the back wall -->
+            <div class="rack">
+              <span class="rack-bar"></span>
+              <span class="hanger"><svg viewBox="0 0 40 90" aria-hidden="true" focusable="false"><use href="#b-witch"/></svg></span>
+              <span class="hanger h2"><svg viewBox="0 0 40 90" aria-hidden="true" focusable="false"><use href="#b-ghost"/></svg></span>
+              <span class="hanger h3"><svg viewBox="0 0 40 90" aria-hidden="true" focusable="false"><use href="#b-vampire"/></svg></span>
+            </div>
+
+            <div class="floor"></div>
+
+            <!-- Mannequin -->
+            <div class="mannequin">
+              <svg viewBox="0 0 40 90" aria-hidden="true" focusable="false"><rect class="k-bk" x="19" y="60" width="2" height="28"/><use href="#b-witch"/></svg>
+              <span class="mannequin-base"></span>
+            </div>
+
+            <!-- Shopkeeper behind counter -->
+            <div class="sprite shopkeeper" style="--x:72%;--y:17%;--w:13">
+              <svg class="fig" viewBox="0 0 40 90" aria-hidden="true" focusable="false">
+                <use href="#b-vampire"/>
+                <g class="wave-arm"><path class="k-pu" d="M27 36 L35 22" fill="none" stroke-width="5" stroke-linecap="round"/><circle class="s4" cx="36" cy="19" r="3.2"/></g>
+              </svg>
+            </div>
+
+            <!-- Counter, jars and cat -->
+            <div class="counter">
+              <span class="register"></span>
+              <span class="jar j1"></span><span class="jar j2"></span><span class="jar j3"></span>
+            </div>
+            <div class="sprite cat-wrap" style="--x:87%;--y:25%;--w:11">
+              <svg class="cat" viewBox="0 0 60 60" aria-hidden="true" focusable="false">
+                <path class="tail" d="M40 54 C54 54 58 40 52 32" fill="none" stroke-width="5" stroke-linecap="round"/>
+                <use href="#cat-sit"/>
+                <g class="eyes"><ellipse class="cg" cx="23.5" cy="21" rx="2.4" ry="3.2"/><ellipse class="cg" cx="33" cy="21" rx="2.4" ry="3.2"/></g>
+              </svg>
+            </div>
+
+            <div class="props">
+              <input type="checkbox" id="lit-boutique-1" class="lantern-check">
+              <label class="lantern" for="lit-boutique-1" style="--x:47%;--y:4%;--w:9">
+                <svg viewBox="0 0 60 56" aria-hidden="true" focusable="false">
+                  <ellipse class="pk" cx="30" cy="32" rx="27" ry="21"/>
+                  <ellipse class="pk-dark" cx="30" cy="32" rx="13" ry="21"/>
+                  <rect class="sl" x="27" y="6" width="6" height="9" rx="2"/>
+                  <g class="face"><path d="M16 26 L24 26 L20 34Z M36 26 L44 26 L40 34Z M17 40 Q30 52 43 40 L39 38 L35 42 L30 38 L25 42 L21 38Z"/></g>
+                </svg>
+                <span class="visually-hidden">Light the shop jack-o'-lantern</span>
+              </label>
+            </div>
+
+            <!-- Customers (humans) -->
+            <div class="sprite walker" style="--x:30%;--y:5%;--w:12.5;--dur:32s;--delay:-12s">
+              <svg class="fig" viewBox="0 0 40 90" aria-hidden="true" focusable="false">
+                <rect class="leg a" x="12" y="62" width="7" height="26" rx="3.5"/><rect class="leg b" x="21" y="62" width="7" height="26" rx="3.5"/>
+                <use href="#b-ghost"/>
+              </svg>
+            </div>
+            <div class="sprite walker rtl" style="--x:60%;--y:2%;--w:13;--dur:38s;--delay:-14.8s">
+              <svg class="fig" viewBox="0 0 40 90" aria-hidden="true" focusable="false">
+                <rect class="leg a" x="12" y="62" width="7" height="26" rx="3.5"/><rect class="leg b" x="21" y="62" width="7" height="26" rx="3.5"/>
+                <use href="#b-witch"/>
+              </svg>
+            </div>
+
+            <div class="shop-dim"></div>
+            <div class="confetti"></div>
+          </div>
+        </div>
+
+        <details class="scene-guide">
+          <summary>What is happening in the boutique?</summary>
+          <ul>
+            <li><strong>People:</strong> a shopkeeper waves from behind the counter while two customers wander the floor in their costumes.</li>
+            <li><strong>Animals:</strong> a black cat flicks its tail on the counter, bats sway from the beam, and a spider lowers itself on a thread.</li>
+            <li><strong>Weather:</strong> rain streaks the window and lightning flickers across the glass.</li>
+            <li><strong>Vehicle and objects:</strong> a taxi with glowing headlights passes the window; a ceiling fan spins and costumes sway on the rack.</li>
+            <li><strong>Halloween:</strong> costumes, a pumpkin to light, twinkling string lights and candy jars.</li>
+          </ul>
+        </details>
+      </section>
+
+      <!-- ===================================================== -->
+      <!-- SCENE 3 : ROOFTOPS                                    -->
+      <!-- ===================================================== -->
+      <section class="scene" id="rooftops" aria-labelledby="rooftops-title">
+        <div class="scene-head">
+          <h2 id="rooftops-title">Rooftops</h2>
+          <p>High above the city, a witch flies by the moon and a rooftop party shakes under the storm clouds.</p>
+        </div>
+
+        <div class="stage-frame">
+          <div class="stage stage-rooftops" role="group" aria-label="Animated scene on the city rooftops: a skeleton and a pumpkin-headed dancer party under a stormy sky, a witch flies on a broom, a pumpkin balloon drifts by, an owl blinks, clouds roll past the moon and lightning flickers.">
+            <div class="sky"></div>
+            <div class="stars"></div>
+            <div class="moon moon-big"></div>
+            <div class="clouds clouds-back"></div>
+            <div class="clouds clouds-front"></div>
+            <div class="sky-flash"></div>
+            <div class="bolt"></div>
+            <div class="skyline skyline-rooftops"></div>
+            <div class="skyline-lights"></div>
+
+            <!-- Balloon (vehicle) -->
+            <div class="balloon" style="--y:50%;--w:14;--dur:70s;--delay:-44s">
+              <svg viewBox="0 0 80 110" aria-hidden="true" focusable="false">
+                <ellipse class="pk" cx="40" cy="34" rx="30" ry="32"/>
+                <path class="k-pu" d="M40 2 Q22 34 40 66 M40 2 Q58 34 40 66" fill="none" stroke-width="5"/>
+                <path class="k-bk" d="M24 62 L32 90 M56 62 L48 90" stroke-width="1.2"/>
+                <g class="basket"><rect class="s3" x="30" y="88" width="20" height="14" rx="2"/><circle class="s4" cx="40" cy="84" r="5"/><path class="bk" d="M35 82 Q40 76 45 82Z"/><g class="wave-arm"><path class="k-bk" d="M45 90 L52 80" fill="none" stroke-width="3" stroke-linecap="round"/></g></g>
+              </svg>
+            </div>
+
+            <!-- Witch on a broom (vehicle / object in motion) -->
+            <div class="broom-fly" style="--y:72%;--w:16;--dur:20s;--delay:-6s">
+              <span class="broom-trail"></span>
+              <svg class="broom" viewBox="0 0 100 60" aria-hidden="true" focusable="false">
+                <path class="k-pk" d="M4 44 H80" fill="none" stroke-width="3" stroke-linecap="round"/>
+                <path class="pk" d="M80 40 L98 36 L98 52 L80 48Z"/>
+                <path class="k-bk" d="M84 42 L96 40 M84 46 L96 48" stroke-width="1"/>
+                <path class="pu" d="M30 44 C28 28 40 22 52 24 L62 44Z"/>
+                <circle class="s1" cx="46" cy="16" r="7"/>
+                <path class="bk" d="M33 14 Q47 9 60 14 Q47 17 33 14Z"/>
+                <path class="bk" d="M40 12 L52 -2 L56 12Z"/>
+                <path class="bk" d="M44 44 q-8 8 -12 12 q10 -2 18 -6Z"/>
+                <path class="bk" d="M60 34 q8 -8 6 -4 q-2 8 -8 8Z" opacity="0"/>
+                <ellipse class="bk" cx="76" cy="38" rx="6" ry="5"/>
+                <path class="bk" d="M72 35 L72 28 L77 33Z M80 35 L81 28 L84 35Z"/>
+                <circle class="cg" cx="74" cy="37" r="1.2"/><circle class="cg" cx="79" cy="37" r="1.2"/>
+              </svg>
+            </div>
+
+            <!-- Bats -->
+            <div class="bat-fly" style="--x:36%;--y:84%;--w:6;--dur:16s;--delay:-3s">
+              <svg class="bat" viewBox="0 0 60 30" aria-hidden="true" focusable="false"><path class="wing bk" d="M30 14 C22 2 10 4 1 10 C8 10 10 15 12 21 C16 15 20 17 24 23 C26 19 28 16 30 14Z"/><path class="wing bk" d="M30 14 C38 2 50 4 59 10 C52 10 50 15 48 21 C44 15 40 17 36 23 C34 19 32 16 30 14Z"/><ellipse class="bk" cx="30" cy="15" rx="4" ry="6"/></svg>
+            </div>
+            <div class="bat-fly rev" style="--x:64%;--y:54%;--w:4.5;--dur:22s;--delay:-12s">
+              <svg class="bat" viewBox="0 0 60 30" aria-hidden="true" focusable="false"><path class="wing bk" d="M30 14 C22 2 10 4 1 10 C8 10 10 15 12 21 C16 15 20 17 24 23 C26 19 28 16 30 14Z"/><path class="wing bk" d="M30 14 C38 2 50 4 59 10 C52 10 50 15 48 21 C44 15 40 17 36 23 C34 19 32 16 30 14Z"/><ellipse class="bk" cx="30" cy="15" rx="4" ry="6"/></svg>
+            </div>
+            <div class="bat-fly" style="--x:90%;--y:62%;--w:4;--dur:26s;--delay:-18s">
+              <svg class="bat" viewBox="0 0 60 30" aria-hidden="true" focusable="false"><path class="wing bk" d="M30 14 C22 2 10 4 1 10 C8 10 10 15 12 21 C16 15 20 17 24 23 C26 19 28 16 30 14Z"/><path class="wing bk" d="M30 14 C38 2 50 4 59 10 C52 10 50 15 48 21 C44 15 40 17 36 23 C34 19 32 16 30 14Z"/><ellipse class="bk" cx="30" cy="15" rx="4" ry="6"/></svg>
+            </div>
+
+            <!-- Rooftop set -->
+            <div class="roof-back"></div>
+            <div class="chimney"><span class="smoke s1"></span><span class="smoke s2"></span><span class="smoke s3"></span></div>
+            <div class="sprite owl-wrap" style="--x:9.2%;--y:44.3%;--w:6">
+              <svg class="owl" viewBox="0 0 40 50" aria-hidden="true" focusable="false">
+                <ellipse class="s3" cx="20" cy="30" rx="13" ry="16"/>
+                <path class="s3" d="M8 18 L10 6 L17 13 M32 18 L30 6 L23 13Z"/>
+                <circle class="s3" cx="20" cy="18" r="12"/>
+                <circle class="gh" cx="14.5" cy="18" r="5.5"/><circle class="gh" cx="25.5" cy="18" r="5.5"/>
+                <g class="owl-eyes"><circle class="cg" cx="14.5" cy="18" r="3.2"/><circle class="cg" cx="25.5" cy="18" r="3.2"/><circle class="bk" cx="14.5" cy="18" r="0.95"/><circle class="bk" cx="25.5" cy="18" r="0.95"/></g>
+                <path class="pk" d="M18 22 L22 22 L20 27Z"/>
+              </svg>
+            </div>
+            <div class="vane"><span class="vane-pole"></span><svg class="vane-arrow" viewBox="0 0 60 24" aria-hidden="true" focusable="false"><path class="bk" d="M2 12 L14 4 V9 H46 L40 4 L58 12 L40 20 L46 15 H14 V20Z"/></svg></div>
+            <svg class="bunting" viewBox="0 0 100 14" aria-hidden="true" focusable="false">
+              <path class="k-bk" d="M0 1 Q50 12 100 1" fill="none" stroke-width=".5"/>
+              <path class="flag pk" d="M8 2.5 L13 2.8 L10.5 8Z"/><path class="flag pu" d="M20 4.4 L25 4.8 L22.5 10Z"/><path class="flag sl" d="M32 5.9 L37 6.2 L34.5 11.5Z"/><path class="flag cg" d="M44 6.8 L49 6.9 L46.5 12Z"/><path class="flag pk" d="M56 6.9 L61 6.8 L58.5 12Z"/><path class="flag pu" d="M68 6.3 L73 6 L70.5 11.2Z"/><path class="flag sl" d="M80 4.9 L85 4.5 L82.5 9.8Z"/><path class="flag cg" d="M91 3 L96 2.6 L93.5 8Z"/>
+            </svg>
+            <div class="roof-front"></div>
+
+            <!-- Rooftop party: skeleton + pumpkin-head dancers -->
+            <div class="sprite dancer skeleton" style="--x:38%;--y:19%;--w:11.5">
+              <svg class="fig" viewBox="0 0 40 90" aria-hidden="true" focusable="false">
+                <rect class="leg a" x="12" y="62" width="7" height="26" rx="3.5"/><rect class="leg b" x="21" y="62" width="7" height="26" rx="3.5"/>
+                <path class="bk" d="M13 33 H27 L28 64 H12 Z"/>
+                <path class="k-gh" d="M20 34 V62 M14 40 H26 M14 46 H26 M15 52 H25" fill="none" stroke-width="1.4"/>
+                <g class="arm-l"><path class="k-bk" d="M14 36 L5 24" fill="none" stroke-width="5" stroke-linecap="round"/><path class="k-gh" d="M14 36 L5 24" fill="none" stroke-width="1.4"/></g>
+                <g class="arm-r"><path class="k-bk" d="M26 36 L35 24" fill="none" stroke-width="5" stroke-linecap="round"/><path class="k-gh" d="M26 36 L35 24" fill="none" stroke-width="1.4"/></g>
+                <circle class="gh" cx="20" cy="21" r="9"/>
+                <ellipse class="bk" cx="16.5" cy="20" rx="2.4" ry="3"/><ellipse class="bk" cx="23.5" cy="20" rx="2.4" ry="3"/>
+                <path class="k-bk" d="M15 27 H25 M17 26 v3 M20 26 v3 M23 26 v3" fill="none" stroke-width="1"/>
+              </svg>
+            </div>
+            <div class="sprite dancer pumpkinhead" style="--x:54%;--y:18%;--w:11.5">
+              <svg class="fig" viewBox="0 0 40 90" aria-hidden="true" focusable="false">
+                <rect class="leg a" x="12" y="62" width="7" height="26" rx="3.5"/><rect class="leg b" x="21" y="62" width="7" height="26" rx="3.5"/>
+                <path class="pu" d="M12 33 H28 L30 64 H10 Z"/>
+                <g class="arm-l"><path class="k-pu" d="M13 36 L4 46" fill="none" stroke-width="5" stroke-linecap="round"/><circle class="s2" cx="3" cy="47" r="3"/></g>
+                <g class="arm-r"><path class="k-pu" d="M27 36 L36 22" fill="none" stroke-width="5" stroke-linecap="round"/><circle class="s2" cx="37" cy="20" r="3"/></g>
+                <ellipse class="pk" cx="20" cy="20" rx="12" ry="11"/>
+                <ellipse class="pk-dark" cx="20" cy="20" rx="5" ry="11"/>
+                <rect class="sl" x="18.5" y="6" width="3" height="5" rx="1"/>
+                <path class="bk" d="M12 17 L17 17 L14.5 22Z M23 17 L28 17 L25.5 22Z M13 25 Q20 31 27 25 L24 24 L20 27 L16 24Z"/>
+              </svg>
+            </div>
+            <!-- Stargazer kid with telescope -->
+            <div class="sprite walker-still" style="--x:68%;--y:19%;--w:10.5">
+              <svg class="fig" viewBox="0 0 40 90" aria-hidden="true" focusable="false">
+                <rect class="leg" x="12" y="62" width="7" height="26" rx="3.5"/><rect class="leg" x="21" y="62" width="7" height="26" rx="3.5"/>
+                <use href="#b-witch"/>
+              </svg>
+              <span class="telescope"></span>
+            </div>
+            <!-- Cats on the ridge -->
+            <div class="sprite walker cat-run" style="--x:30%;--y:30%;--w:7;--dur:26s;--delay:-9.8s">
+              <svg class="fig cat-walk" viewBox="0 0 60 36" aria-hidden="true" focusable="false">
+                <rect class="leg a" x="14" y="24" width="4.5" height="12" rx="2"/><rect class="leg b" x="20" y="24" width="4.5" height="12" rx="2"/>
+                <rect class="leg b" x="38" y="24" width="4.5" height="12" rx="2"/><rect class="leg a" x="44" y="24" width="4.5" height="12" rx="2"/>
+                <path class="tail-up" d="M12 18 C2 18 2 8 8 4" fill="none" stroke-width="4" stroke-linecap="round"/>
+                <ellipse class="bk" cx="30" cy="20" rx="20" ry="9"/>
+                <circle class="bk" cx="50" cy="14" r="8"/>
+                <path class="bk" d="M45 9 L46 0 L51 6Z M55 9 L57 1 L58 10Z"/>
+                <circle class="cg" cx="52" cy="13" r="1.5"/><circle class="cg" cx="57" cy="14" r="1.5"/>
+              </svg>
+            </div>
+
+            <div class="props">
+              <input type="checkbox" id="lit-roof-1" class="lantern-check">
+              <label class="lantern" for="lit-roof-1" style="--x:80%;--y:20%;--w:7">
+                <svg viewBox="0 0 60 56" aria-hidden="true" focusable="false">
+                  <ellipse class="pk" cx="30" cy="32" rx="27" ry="21"/>
+                  <ellipse class="pk-dark" cx="30" cy="32" rx="13" ry="21"/>
+                  <rect class="sl" x="27" y="6" width="6" height="9" rx="2"/>
+                  <g class="face"><path d="M16 26 L24 26 L20 34Z M36 26 L44 26 L40 34Z M17 40 Q30 52 43 40 L39 38 L35 42 L30 38 L25 42 L21 38Z"/></g>
+                </svg>
+                <span class="visually-hidden">Light the rooftop jack-o'-lantern</span>
+              </label>
+            </div>
+
+            <a class="fire-escape" href="#street">
+              <span class="fire-escape-sign">Down to Main Street</span>
+              <span class="visually-hidden">Climb down to the Main Street scene</span>
+            </a>
+
+            <div class="leaves" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span></div>
+            <div class="fog fog-front fog-roof"></div>
+            <div class="fog fog-extra"></div>
+            <div class="confetti"></div>
+          </div>
+        </div>
+
+        <details class="scene-guide">
+          <summary>What is happening on the rooftops?</summary>
+          <ul>
+            <li><strong>People:</strong> a skeleton and a pumpkin-headed guest dance, and a young stargazer watches the sky; a rider waves from the balloon basket.</li>
+            <li><strong>Animals:</strong> an owl blinks on the chimney, a cat prowls the ridge and bats circle the moon.</li>
+            <li><strong>Weather:</strong> storm clouds roll across the moon, lightning flickers and the wind pushes the bunting and leaves.</li>
+            <li><strong>Vehicle and objects:</strong> a witch swoops by on her broom, a pumpkin balloon drifts across the sky, and the weather vane swings.</li>
+            <li><strong>Halloween:</strong> a huge harvest moon, party bunting, a jack-o'-lantern to light, and chimney smoke curling in the night.</li>
+          </ul>
+        </details>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <p>The Haunted Harvest &middot; made by Ibrahim Mackey &middot; 100% HTML5 + CSS3, zero JavaScript.</p>
+      <p class="fine">Tip: press <kbd>Tab</kbd> to move through the scenes, pumpkins and effects. Motion stops automatically if your device asks for reduced motion.</p>
+    </footer>
+  </div>
+</body>
+</html>
