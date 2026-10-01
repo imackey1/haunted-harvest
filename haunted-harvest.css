@@ -1,0 +1,1068 @@
+@import url("https://fonts.googleapis.com/css2?family=Creepster&family=Poppins:wght@400;600;700&display=swap");
+
+/* =====================================================================
+   THE HAUNTED HARVEST  -  Monsters' City Street
+   Pure CSS3. No JavaScript.
+
+   Contents
+   01  Palette + design tokens
+   02  Base + typography
+   03  Page chrome (header, nav, effect switches, footer)
+   04  Scene switching (:target)
+   05  Stage framework + shared sprite rules
+   06  Shared animated parts (figures, cats, bats, lanterns, weather)
+   07  Scene 1: Main Street
+   08  Scene 2: Costume Boutique
+   09  Scene 3: Rooftops
+   10  Effect switches + hover/focus micro-interactions
+   11  Responsive
+   12  Keyframes
+   13  Reduced motion
+   ===================================================================== */
+
+/* ---------- 01 PALETTE + TOKENS ---------- */
+:root {
+  /* Required palette */
+  --pumpkin: #ff7518;
+  --candy-purple: #5a189a;
+  --spider-black: #1a1423;
+  --slime-green: #8ac926;
+  --ghost-white: #f6f2f8;
+  --candle-glow: #ffd60a;
+
+  /* Supporting shades used by the artwork */
+  --purple-light: #7b2cbf;
+  --pumpkin-dark: #c2530a;
+  --night-blue: #16213e;
+  --blood: #c1121f;
+  --skin-1: #f1c9a5;
+  --skin-2: #c68642;
+  --skin-3: #8d5524;
+  --skin-4: #e7dcef;
+  --wood: #5a3a2e;
+  --wood-dark: #3b2018;
+  --fog: 246, 242, 248;
+
+  --font-display: "Creepster", "Chiller", "Impact", fantasy;
+  --font-body: "Poppins", "Segoe UI", system-ui, -apple-system, sans-serif;
+  --focus-ring: 3px solid var(--candle-glow);
+}
+
+/* ---------- 02 BASE ---------- */
+*,
+*::before,
+*::after { box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  margin: 0;
+  font-family: var(--font-body);
+  line-height: 1.6;
+  color: var(--ghost-white);
+  background:
+    radial-gradient(circle at 50% -10%, rgba(90, 24, 154, 0.55), transparent 55%),
+    var(--spider-black);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+h1, h2 {
+  font-family: var(--font-display);
+  font-weight: 400;
+  letter-spacing: 0.04em;
+  margin: 0;
+  line-height: 1.05;
+}
+
+p { margin: 0 0 0.75rem; }
+
+kbd {
+  font-family: var(--font-body);
+  background: var(--ghost-white);
+  color: var(--spider-black);
+  padding: 0.05rem 0.45rem;
+  border-radius: 4px;
+  font-size: 0.85em;
+}
+
+.visually-hidden {
+  position: absolute !important;
+  width: 1px; height: 1px;
+  margin: -1px; padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+.sprite-defs { position: absolute; width: 0; height: 0; overflow: hidden; }
+
+/* Keyboard users: one visible, high-contrast focus style everywhere */
+a:focus-visible,
+.switch-input:focus-visible + label,
+.lantern-check:focus-visible + .lantern,
+summary:focus-visible,
+.scenes:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: 3px;
+}
+
+.skip-link {
+  position: absolute;
+  left: 1rem; top: -4rem;
+  z-index: 100;
+  background: var(--candle-glow);
+  color: var(--spider-black);
+  font-weight: 700;
+  padding: 0.6rem 1rem;
+  border-radius: 8px;
+  text-decoration: none;
+  transition: top 0.2s;
+}
+.skip-link:focus { top: 0.75rem; }
+
+/* ---------- 03 PAGE CHROME ---------- */
+.app { max-width: 1160px; margin: 0 auto; padding: 0 16px 32px; }
+
+.site-header { text-align: center; padding: 28px 0 12px; }
+
+.eyebrow {
+  color: var(--slime-green);
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  font-size: 0.78rem;
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+}
+
+.site-header h1 {
+  font-size: clamp(2.6rem, 11vw, 5rem);
+  color: var(--pumpkin);
+  text-shadow: 0 0 18px rgba(255, 117, 24, 0.55), 3px 3px 0 var(--candy-purple);
+  animation: flicker 6s infinite;
+}
+
+.tagline { color: var(--ghost-white); opacity: 0.9; margin-top: 0.5rem; }
+
+.scene-nav {
+  position: sticky; top: 0; z-index: 50;
+  background: rgba(26, 20, 35, 0.94);
+  border-bottom: 2px solid var(--candy-purple);
+  padding: 10px 0;
+}
+.scene-nav ul {
+  list-style: none; margin: 0; padding: 0;
+  display: flex; flex-wrap: wrap; justify-content: center; gap: 8px;
+}
+.scene-nav a {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-height: 44px; padding: 0.4rem 1.1rem;
+  border-radius: 999px;
+  border: 2px solid var(--ghost-white);
+  background: var(--candy-purple);
+  color: var(--ghost-white);
+  font-weight: 600; font-size: 0.95rem;
+  text-decoration: none;
+  transition: transform 0.2s, background-color 0.2s, color 0.2s, box-shadow 0.2s;
+}
+.scene-nav a:hover {
+  background: var(--pumpkin); color: var(--spider-black);
+  transform: translateY(-3px);
+  box-shadow: 0 6px 16px rgba(255, 117, 24, 0.45);
+}
+
+/* current scene highlight (pure CSS, driven by :target) */
+.app:not(:has(.scene:target)) .nav-street,
+.app:has(#street:target) .nav-street,
+.app:has(#boutique:target) .nav-boutique,
+.app:has(#rooftops:target) .nav-rooftops {
+  background: var(--pumpkin); color: var(--spider-black); border-color: var(--candle-glow);
+}
+
+.controls { margin: 16px 0 8px; }
+.controls fieldset {
+  display: flex; flex-wrap: wrap; justify-content: center; gap: 8px 22px;
+  border: 1px solid rgba(246, 242, 248, 0.35);
+  border-radius: 12px; padding: 8px 18px 12px; margin: 0;
+}
+.controls legend { padding: 0 8px; font-weight: 600; color: var(--candle-glow); font-size: 0.9rem; }
+
+.switch { position: relative; }
+.switch-input {
+  position: absolute; opacity: 0; width: 44px; height: 44px; margin: 0; left: 0; top: 0;
+  cursor: pointer;
+}
+.switch label {
+  display: inline-flex; align-items: center; gap: 10px;
+  min-height: 44px; cursor: pointer; font-weight: 600; font-size: 0.95rem;
+  border-radius: 999px; padding-right: 6px;
+}
+.switch label::before {
+  content: ""; flex: none;
+  width: 46px; height: 26px; border-radius: 999px;
+  background: #3a2c52; border: 2px solid var(--ghost-white);
+  box-shadow: inset 0 0 0 2px var(--spider-black);
+  transition: background-color 0.25s;
+}
+.switch label::after {
+  content: ""; position: absolute; left: 5px; top: 50%;
+  width: 18px; height: 18px; margin-top: -9px; border-radius: 50%;
+  background: var(--ghost-white);
+  transition: transform 0.25s, background-color 0.25s;
+}
+.switch-input:checked + label::before { background: var(--slime-green); }
+.switch-input:checked + label::after { transform: translateX(20px); background: var(--spider-black); }
+.switch label:hover::before { box-shadow: inset 0 0 0 2px var(--spider-black), 0 0 12px rgba(138, 201, 38, 0.7); }
+
+.site-footer {
+  text-align: center; padding: 28px 0 8px; margin-top: 24px;
+  border-top: 1px dashed rgba(246, 242, 248, 0.3);
+}
+.site-footer .fine { font-size: 0.85rem; opacity: 0.8; }
+
+/* ---------- 04 SCENE SWITCHING (starter rules, extended) ---------- */
+.scenes { outline: none; padding-top: 12px; }
+.scene { display: none; }
+.scenes:not(:has(.scene:target)) .scene:first-child { display: block; }
+.scene:target { display: block; }
+.scene { scroll-margin-top: 78px; animation: scene-in 0.6s ease-out both; }
+
+.scene-head { text-align: center; margin: 10px 0 14px; }
+.scene-head h2 { font-size: clamp(2rem, 7vw, 3rem); color: var(--candle-glow); text-shadow: 2px 2px 0 var(--candy-purple); }
+.scene-head p { max-width: 62ch; margin: 0.4rem auto 0; }
+
+.scene-guide {
+  max-width: 860px; margin: 16px auto 0;
+  background: rgba(90, 24, 154, 0.28);
+  border: 1px solid var(--candy-purple); border-radius: 12px; padding: 4px 16px;
+}
+.scene-guide summary { cursor: pointer; padding: 10px 0; font-weight: 700; color: var(--candle-glow); border-radius: 6px; }
+.scene-guide summary:hover { color: var(--pumpkin); }
+.scene-guide ul { margin: 0 0 12px; padding-left: 1.2rem; }
+.scene-guide li { margin-bottom: 0.4rem; }
+
+/* ---------- 05 STAGE FRAMEWORK ---------- */
+.stage-frame {
+  container-type: inline-size;
+  max-width: 1100px; margin: 0 auto;
+  border: 3px solid var(--candy-purple);
+  border-radius: 16px; overflow: hidden;
+  box-shadow: 0 0 36px rgba(90, 24, 154, 0.65);
+  background: var(--spider-black);
+}
+
+/* --u is "1% of the stage width", so every size scales with the scene */
+.stage {
+  --u: 1vw;
+  position: relative; width: 100%; aspect-ratio: 4 / 5;
+  overflow: hidden; isolation: isolate;
+  background: var(--spider-black);
+}
+@supports (width: 1cqw) { .stage { --u: 1cqw; } }
+
+.stage > * { position: absolute; }
+.stage svg { overflow: visible; }
+
+/* artwork colour utilities (SVG fills read the palette variables) */
+.pk { fill: var(--pumpkin); }
+.pk-dark { fill: var(--pumpkin-dark); }
+.pu { fill: var(--candy-purple); }
+.pl { fill: var(--purple-light); }
+.bk { fill: var(--spider-black); }
+.sl { fill: var(--slime-green); }
+.gh { fill: var(--ghost-white); }
+.cg { fill: var(--candle-glow); }
+.rd { fill: var(--blood); }
+.nv { fill: var(--night-blue); }
+.s1 { fill: var(--skin-1); }
+.s2 { fill: var(--skin-2); }
+.s3 { fill: var(--skin-3); }
+.s4 { fill: var(--skin-4); }
+.k-pk { stroke: var(--pumpkin); }
+.k-pu { stroke: var(--candy-purple); }
+.k-pl { stroke: var(--purple-light); }
+.k-bk { stroke: var(--spider-black); }
+.k-gh { stroke: var(--ghost-white); }
+.k-sl { stroke: var(--slime-green); }
+
+/* Decorative moving layers never swallow clicks meant for doors, ladders or pumpkins */
+.sprite, .bat-fly, .vehicle, .balloon, .broom-fly, .hang-bat, .spider-drop, .fan, .mannequin, .rack,
+.string-lights, .shop-dim, .bunting, .vane, .clouds, .bolt, .sky-flash, .smoke, .chimney, .counter, .floor, .roof-front, .roof-back {
+  pointer-events: none;
+}
+.cat-wrap { pointer-events: auto; }
+
+.sprite {
+  left: var(--x, 0); bottom: var(--y, 0);
+  width: max(26px, calc(var(--u) * var(--w, 10)));
+  z-index: 5;
+}
+
+/* ---------- 06 SHARED ANIMATED PARTS ---------- */
+/* People + animals that walk */
+.walker { animation: walk-right var(--dur, 30s) linear var(--delay, 0s) infinite; }
+.walker.rtl { animation-name: walk-left; transform: scaleX(-1); }
+
+.fig {
+  display: block; width: 100%; height: auto;
+  filter: drop-shadow(0 0 1px rgba(246, 242, 248, 0.55));
+  animation: bob 0.7s ease-in-out infinite;
+}
+.leg {
+  fill: var(--leg, #46346b);
+  transform-box: fill-box; transform-origin: 50% 0;
+  animation: step 0.7s ease-in-out infinite alternate;
+}
+.leg.b { animation-direction: alternate-reverse; }
+.zombie { --leg: #4a5568; }
+.dog .leg { fill: var(--skin-3); }
+.cat-walk .leg { fill: var(--spider-black); }
+.dog .tail-dog {
+  stroke: var(--skin-3);
+  transform-box: view-box; transform-origin: 12px 18px;
+  animation: wag 0.3s ease-in-out infinite alternate;
+}
+.tail-up {
+  stroke: var(--spider-black);
+  transform-box: view-box; transform-origin: 12px 18px;
+  animation: tail-sway 1.6s ease-in-out infinite alternate;
+}
+
+/* Sitting cats */
+.cat-wrap { z-index: 4; }
+.cat {
+  display: block; width: 100%; height: auto;
+  filter: drop-shadow(0 0 1px rgba(246, 242, 248, 0.7));
+}
+.cat .tail {
+  stroke: var(--spider-black);
+  transform-box: view-box; transform-origin: 40px 54px;
+  animation: tail-sway 2.8s ease-in-out infinite alternate;
+}
+.cat .eyes {
+  transform-box: fill-box; transform-origin: center;
+  animation: blink 5s infinite;
+}
+
+/* Bats */
+.bat-fly {
+  left: var(--x, 20%); bottom: var(--y, 70%);
+  width: max(24px, calc(var(--u) * var(--w, 6)));
+  z-index: 3;
+  animation: bat-cross var(--dur, 20s) linear var(--delay, 0s) infinite;
+}
+.bat-fly.rev { animation-name: bat-cross-rev; transform: scaleX(-1); }
+.bat {
+  display: block; width: 100%; height: auto;
+  filter: drop-shadow(0 0 1px rgba(246, 242, 248, 0.6));
+  animation: bat-wave 2.2s ease-in-out infinite alternate;
+}
+.bat .wing {
+  transform-box: view-box; transform-origin: 30px 14px;
+  animation: flap 0.28s ease-in-out infinite alternate;
+}
+
+/* Jack-o'-lanterns: real checkboxes, so they work with mouse, touch and keyboard */
+.props { inset: 0; pointer-events: none; z-index: 6; }
+.props > * { pointer-events: auto; }
+.lantern-check {
+  position: absolute; opacity: 0; width: 1px; height: 1px; pointer-events: none;
+}
+.lantern {
+  position: absolute; z-index: 6; display: block;
+  left: var(--x); bottom: var(--y);
+  width: max(44px, calc(var(--u) * var(--w, 8)));
+  cursor: pointer; border-radius: 50%;
+  transition: transform 0.2s;
+}
+.lantern svg { display: block; width: 100%; height: auto; position: relative; }
+.lantern::before {
+  content: ""; position: absolute; inset: -40%;
+  background: radial-gradient(circle, rgba(255, 214, 10, 0.65), rgba(255, 117, 24, 0.25) 45%, transparent 70%);
+  opacity: 0; transition: opacity 0.3s; pointer-events: none;
+}
+.lantern .face { fill: var(--spider-black); transition: fill 0.25s; }
+.lantern:hover { transform: translateY(-4px) scale(1.07); }
+.lantern:hover .face { fill: var(--pumpkin-dark); }
+.lantern-check:checked + .lantern::before { opacity: 1; animation: flicker 3.4s infinite; }
+.lantern-check:checked + .lantern .face { fill: var(--candle-glow); }
+
+/* Weather: fog (seamless loop: 200% wide, tile is half the stage) */
+.fog {
+  left: 0; width: 200%; pointer-events: none;
+  background-repeat: repeat-x;
+  background-image:
+    radial-gradient(ellipse closest-side at 50% 55%, rgba(var(--fog), 0.55), rgba(var(--fog), 0)),
+    radial-gradient(ellipse closest-side at 50% 40%, rgba(var(--fog), 0.35), rgba(var(--fog), 0));
+  background-size: 25% 100%, 12.5% 80%;
+  background-position: 0 0, 3% 20%;
+  animation: fog-drift 55s linear infinite;
+}
+.fog-back  { bottom: 15%; height: 30%; opacity: 0.55; z-index: 2; }
+.fog-front { bottom: -2%; height: 28%; opacity: 0.7;  z-index: 10; animation-duration: 36s; animation-direction: reverse; }
+.fog-extra { bottom: 0; height: 70%; opacity: 0; z-index: 10; animation-duration: 70s; transition: opacity 0.6s; }
+
+/* Weather: wind-blown leaves */
+.leaves { inset: 0; pointer-events: none; z-index: 11; }
+.leaves span {
+  position: absolute; left: var(--l); top: var(--t);
+  width: max(7px, calc(var(--u) * 1.3)); height: max(5px, calc(var(--u) * 0.85));
+  border-radius: 0 100% 0 100%;
+  background: var(--lc, var(--pumpkin));
+  animation:
+    leaf-fall var(--d, 10s) linear var(--dl, 0s) infinite,
+    leaf-sway 2.6s ease-in-out var(--dl, 0s) infinite alternate;
+}
+.leaves span:nth-child(1) { --l: 6%;  --t: 30%; --d: 11s; --dl: -3s; }
+.leaves span:nth-child(2) { --l: 18%; --t: 62%; --d: 9s;  --dl: -6s; --lc: var(--slime-green); }
+.leaves span:nth-child(3) { --l: 33%; --t: 15%; --d: 12s; --dl: -1s; --lc: var(--candle-glow); }
+.leaves span:nth-child(4) { --l: 47%; --t: 48%; --d: 10s; --dl: -8s; }
+.leaves span:nth-child(5) { --l: 62%; --t: 70%; --d: 13s; --dl: -4s; --lc: var(--ghost-white); }
+.leaves span:nth-child(6) { --l: 76%; --t: 25%; --d: 9.5s; --dl: -7s; --lc: var(--slime-green); }
+.leaves span:nth-child(7) { --l: 90%; --t: 55%; --d: 11.5s; --dl: -2s; }
+
+/* Weather: candy confetti (off until the switch is on) */
+.confetti {
+  inset: 0; z-index: 12; pointer-events: none;
+  opacity: 0; visibility: hidden; transition: opacity 0.4s, visibility 0.4s;
+  background-image:
+    radial-gradient(circle at 20% 30%, var(--pumpkin) 0 4px, transparent 4.5px),
+    radial-gradient(circle at 60% 50%, var(--slime-green) 0 3.5px, transparent 4px),
+    radial-gradient(circle at 40% 70%, var(--candle-glow) 0 3px, transparent 3.5px),
+    radial-gradient(circle at 80% 20%, var(--ghost-white) 0 3px, transparent 3.5px),
+    radial-gradient(circle at 30% 80%, var(--purple-light) 0 4px, transparent 4.5px);
+  background-size: 90px 120px, 130px 150px, 70px 100px, 110px 130px, 150px 180px;
+  animation: confetti-fall 9s linear infinite;
+}
+
+/* Candle-glow overlay (switch) */
+.stage::after {
+  content: ""; inset: 0; z-index: 13; pointer-events: none;
+  background: radial-gradient(circle at 50% 75%, rgba(255, 214, 10, 0.28), rgba(255, 117, 24, 0.12) 45%, transparent 70%);
+  mix-blend-mode: screen; opacity: 0; transition: opacity 0.5s;
+}
+
+/* Sky pieces used by Street + Rooftops */
+.sky {
+  inset: 0;
+  background: linear-gradient(180deg, #0d0a14 0%, var(--spider-black) 30%, #2a1155 68%, var(--candy-purple) 100%);
+}
+.stars {
+  inset: 0 0 45% 0;
+  background-image:
+    radial-gradient(circle, var(--ghost-white) 0 1px, transparent 1.6px),
+    radial-gradient(circle, var(--candle-glow) 0 1px, transparent 1.6px);
+  background-size: 83px 61px, 127px 97px;
+  background-position: 10px 8px, 40px 30px;
+  animation: twinkle 4s ease-in-out infinite alternate;
+}
+.moon {
+  right: 10%; top: 6%;
+  width: calc(var(--u) * 15); aspect-ratio: 1; border-radius: 50%;
+  background:
+    radial-gradient(circle at 30% 35%, rgba(194, 120, 0, 0.35) 0 9%, transparent 10%),
+    radial-gradient(circle at 65% 60%, rgba(194, 120, 0, 0.3) 0 12%, transparent 13%),
+    radial-gradient(circle at 40% 30%, #fff9d6, var(--candle-glow) 60%, #e8a900);
+  box-shadow: 0 0 calc(var(--u) * 6) rgba(255, 214, 10, 0.5), 0 0 calc(var(--u) * 14) rgba(255, 117, 24, 0.25);
+  animation: glow-pulse 6s ease-in-out infinite alternate;
+}
+.skyline, .skyline-lights {
+  left: 0; right: 0;
+  clip-path: polygon(0 100%, 0 55%, 6% 55%, 6% 30%, 11% 30%, 11% 48%, 16% 48%, 16% 20%, 22% 20%, 22% 40%, 28% 40%, 28% 60%, 34% 60%, 34% 25%, 40% 25%, 40% 45%, 47% 45%, 47% 15%, 53% 15%, 53% 38%, 60% 38%, 60% 52%, 66% 52%, 66% 28%, 73% 28%, 73% 44%, 80% 44%, 80% 22%, 86% 22%, 86% 50%, 92% 50%, 92% 35%, 100% 35%, 100% 100%);
+}
+.skyline { background: linear-gradient(#2a1550, #1d1038); }
+/* Lit windows: vertical stripes (gradient) x horizontal bands (mask) = a grid of small panes */
+.skyline-lights,
+.skyline-lights::before,
+.bldg-windows {
+  --gx: max(3px, calc(var(--u) * 0.9));
+  --wx: max(4px, calc(var(--u) * 1.1));
+  --gy: max(5px, calc(var(--u) * 1.3));
+  --wy: max(6px, calc(var(--u) * 1.6));
+  --pane: var(--candle-glow);
+  background-image: repeating-linear-gradient(90deg, transparent 0 var(--gx), var(--pane) var(--gx) calc(var(--gx) + var(--wx)));
+  -webkit-mask-image: repeating-linear-gradient(180deg, transparent 0 var(--gy), #000 var(--gy) calc(var(--gy) + var(--wy)));
+          mask-image: repeating-linear-gradient(180deg, transparent 0 var(--gy), #000 var(--gy) calc(var(--gy) + var(--wy)));
+}
+.skyline-lights { opacity: 0.55; animation: flicker 7s infinite; }
+.skyline-lights::before {
+  content: ""; position: absolute; inset: 0;
+  --pane: var(--pumpkin);
+  background-position: calc(var(--gx) * 2) 0;
+  -webkit-mask-position: 0 calc(var(--gy) * 2.2);
+          mask-position: 0 calc(var(--gy) * 2.2);
+  animation: flicker 4.3s infinite reverse;
+}
+
+/* ---------- 07 SCENE 1: MAIN STREET ---------- */
+.stage-street .skyline, .stage-street .skyline-lights { bottom: 23%; height: 40%; }
+.stage-street .skyline-lights { bottom: 23%; }
+
+.bldg { bottom: 23%; z-index: 2; }
+.bldg-windows {
+  position: absolute; inset: 8% 8% 48% 8%;
+  --gx: max(5px, calc(var(--u) * 1.4));
+  --wx: max(6px, calc(var(--u) * 1.8));
+  --gy: max(8px, calc(var(--u) * 2));
+  --wy: max(9px, calc(var(--u) * 2.6));
+  opacity: 0.85;
+  animation: flicker 5.3s infinite;
+}
+
+.bldg-shop {
+  left: 0; width: 38%; height: 58%;
+  background: linear-gradient(#3a2268, #261547);
+  border-top: 5px solid var(--candy-purple);
+  border-right: 4px solid #170f28;
+}
+.awning {
+  position: absolute; left: 34%; bottom: 44%; width: 46%; height: 7%;
+  background: repeating-linear-gradient(90deg, var(--pumpkin) 0 20%, var(--ghost-white) 20% 40%);
+  border-radius: 0 0 50% 50% / 0 0 100% 100%;
+  z-index: 2;
+}
+.lantern-rope {
+  position: absolute; left: 14%; top: 54%; width: 2px; height: 10%;
+  background: var(--ghost-white);
+  transform-origin: 50% 0;
+  animation: swing 3.6s ease-in-out infinite alternate;
+  z-index: 3;
+}
+.paper-lantern {
+  position: absolute; left: 50%; top: 100%; transform: translateX(-50%);
+  width: max(14px, calc(var(--u) * 3.2)); height: max(18px, calc(var(--u) * 4));
+  border-radius: 45%;
+  background: radial-gradient(circle at 50% 40%, var(--candle-glow), var(--pumpkin));
+  box-shadow: 0 0 calc(var(--u) * 3) rgba(255, 214, 10, 0.8);
+}
+.door {
+  position: absolute; left: 38%; bottom: 0; width: max(32%, 46px); height: 42%;
+  background: linear-gradient(var(--wood), var(--wood-dark));
+  border: 3px solid var(--spider-black); border-bottom: 0; border-radius: 8px 8px 0 0;
+  display: block; z-index: 3; text-decoration: none;
+  transition: box-shadow 0.25s, transform 0.25s;
+}
+.door-glass {
+  position: absolute; inset: 12% 18% 38% 18%;
+  background: linear-gradient(var(--candle-glow), var(--pumpkin)); border-radius: 4px; opacity: 0.85;
+  transition: opacity 0.25s;
+}
+.door::after { /* knob */
+  content: ""; position: absolute; right: 12%; top: 70%; width: 7px; height: 7px; border-radius: 50%; background: var(--candle-glow);
+}
+.door-sign, .ladder-sign, .shop-door-sign, .hatch-sign, .fire-escape-sign {
+  display: block;
+  background: var(--spider-black); color: var(--candle-glow);
+  border: 2px solid var(--pumpkin); border-radius: 6px;
+  font-family: var(--font-body); font-weight: 700; line-height: 1.15; text-align: center;
+  font-size: clamp(0.66rem, 1.9cqw, 1.05rem);
+  padding: 0.2rem 0.5rem;
+  transition: background-color 0.2s, color 0.2s, transform 0.2s;
+}
+.door-sign {
+  position: absolute; left: 50%; bottom: calc(100% + max(26px, 6.5cqw)); transform: translateX(-50%);
+  white-space: nowrap;
+}
+
+.bldg-house {
+  right: 0; width: 41%; height: 52%;
+  background: linear-gradient(#321d58, #1f1238);
+  clip-path: polygon(0 20%, 50% 0, 100% 20%, 100% 100%, 0 100%);
+}
+.bldg-house .bldg-windows { inset: 34% 12% 30% 30%; }
+.ladder {
+  position: absolute; left: 6%; bottom: 0; width: max(7%, 26px); height: 78%;
+  display: block; text-decoration: none;
+  background:
+    repeating-linear-gradient(180deg, transparent 0 14px, var(--ghost-white) 14px 17px),
+    linear-gradient(90deg, var(--ghost-white) 0 12%, transparent 12% 88%, var(--ghost-white) 88% 100%);
+  opacity: 0.85; transition: opacity 0.2s, filter 0.2s;
+  z-index: 3;
+}
+.ladder-sign {
+  position: absolute; left: -4px; top: 6%; white-space: nowrap; transform: translateX(-4px);
+}
+.fence {
+  right: 0; width: 46%; height: 9%; bottom: 23%; z-index: 3;
+  background:
+    linear-gradient(var(--candy-purple), var(--candy-purple)) 0 28% / 100% 6% no-repeat,
+    repeating-linear-gradient(90deg, #2d1b45 0 calc(var(--u) * 1.1), transparent calc(var(--u) * 1.1) calc(var(--u) * 2.2));
+  border-top: 2px solid #4a2c78;
+}
+
+.lamp {
+  left: var(--x); bottom: 23%; width: max(3px, calc(var(--u) * 0.7)); height: 34%;
+  background: #0b0812; z-index: 3;
+}
+.lamp-head {
+  position: absolute; top: -2%; left: 50%; transform: translate(-50%, -50%);
+  width: calc(var(--u) * 7); aspect-ratio: 1; border-radius: 50%;
+  background: radial-gradient(circle, var(--candle-glow) 0 14%, rgba(255, 214, 10, 0.45) 30%, transparent 68%);
+  animation: flicker 4.6s infinite;
+}
+.lamp-b .lamp-head { animation-duration: 3.1s; animation-direction: reverse; }
+
+.sidewalk {
+  left: 0; right: 0; bottom: 12%; height: 11%; z-index: 3;
+  background:
+    repeating-linear-gradient(90deg, transparent 0 calc(var(--u) * 11), rgba(0, 0, 0, 0.3) calc(var(--u) * 11) calc(var(--u) * 11.4)),
+    linear-gradient(#4a3a63, #382a50);
+  border-top: 3px solid #5f4d7e;
+}
+.road {
+  left: 0; right: 0; bottom: 0; height: 12%; z-index: 3;
+  background: #0f0b16;
+}
+.road::after {
+  content: ""; position: absolute; left: 0; right: 0; top: 46%; height: 4%; min-height: 3px;
+  background: repeating-linear-gradient(90deg, var(--candle-glow) 0 calc(var(--u) * 6), transparent calc(var(--u) * 6) calc(var(--u) * 12));
+  opacity: 0.8;
+}
+
+.paper-lantern { animation: flicker 3s infinite; }
+
+/* Hearse */
+.vehicle {
+  left: var(--x, 0); bottom: var(--y, 0);
+  width: max(70px, calc(var(--u) * var(--w, 28)));
+  z-index: 9;
+  animation: drive var(--dur, 16s) linear var(--delay, 0s) infinite;
+}
+.vehicle svg { display: block; width: 100%; height: auto; }
+.hearse .bk { fill: #2d1f47; }
+.hearse-body path, .hearse-body rect { stroke: rgba(246, 242, 248, 0.55); stroke-width: 0.8; }
+.hearse-body { animation: car-bounce 0.45s ease-in-out infinite alternate; }
+.wheel {
+  transform-box: fill-box; transform-origin: center;
+  animation: spin 0.55s linear infinite;
+}
+.headbeam { animation: flicker 2.2s infinite; }
+.headlight { filter: drop-shadow(0 0 4px var(--candle-glow)); }
+
+/* ---------- 08 SCENE 2: COSTUME BOUTIQUE ---------- */
+.wall {
+  inset: 0 0 22% 0;
+  background:
+    repeating-linear-gradient(45deg, rgba(246, 242, 248, 0.04) 0 calc(var(--u) * 1.4), transparent calc(var(--u) * 1.4) calc(var(--u) * 2.8)),
+    linear-gradient(#3d1f66, #2a1450);
+}
+.floor {
+  left: 0; right: 0; bottom: 0; height: 22%; z-index: 1;
+  background:
+    repeating-linear-gradient(90deg, rgba(0, 0, 0, 0.3) 0 2px, transparent 2px calc(var(--u) * 9)),
+    linear-gradient(#5b3a3f, #31202a);
+  border-top: 5px solid var(--spider-black);
+}
+.beam-ceiling {
+  left: 0; right: 0; top: 0; height: 5%;
+  background: linear-gradient(#150f1f, #241838); border-bottom: 3px solid #0d0a14;
+}
+.shop-window {
+  left: 26%; top: 19%; width: 36%; height: 34%;
+  border: max(4px, calc(var(--u) * 0.9)) solid #6b4a36;
+  background: var(--night-blue);
+  box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.6), 0 0 16px rgba(0, 0, 0, 0.5);
+  overflow: hidden; z-index: 1;
+}
+.window-view { position: absolute; inset: 0; overflow: hidden; background: linear-gradient(#0e1530, #1c2a52 70%, #25365f); }
+.win-lamp {
+  position: absolute; left: 14%; bottom: 14%; width: 22%; aspect-ratio: 1;
+  background: radial-gradient(circle, var(--candle-glow) 0 10%, rgba(255, 214, 10, 0.4) 28%, transparent 66%);
+  animation: flicker 3.7s infinite;
+}
+.win-taxi {
+  position: absolute; bottom: 8%; left: 110%; width: 42%; height: 22%;
+  background: #0b0812;
+  clip-path: polygon(0 62%, 6% 52%, 22% 46%, 30% 12%, 68% 12%, 80% 46%, 95% 52%, 100% 100%, 0 100%);
+  animation: taxi-pass 8s linear infinite;
+}
+.win-taxi::after { /* roof light */
+  content: ""; position: absolute; left: 42%; top: 0; width: 16%; height: 14%; background: var(--candle-glow);
+}
+.taxi-light {
+  position: absolute; left: 0; top: 52%; width: 12%; aspect-ratio: 1; border-radius: 50%;
+  background: var(--candle-glow); box-shadow: 0 0 12px 6px rgba(255, 214, 10, 0.7);
+}
+.rain {
+  position: absolute; inset: 0; pointer-events: none;
+  background-image: linear-gradient(100deg, transparent 46%, rgba(190, 210, 255, 0.6) 49%, rgba(190, 210, 255, 0.6) 51%, transparent 54%);
+}
+.rain-a { background-size: 14px 40px; animation: rain-fall-a 0.45s linear infinite; }
+.rain-b { background-size: 23px 70px; opacity: 0.55; animation: rain-fall-b 0.8s linear infinite; }
+.win-flash { position: absolute; inset: 0; background: var(--ghost-white); opacity: 0; animation: lightning 9s infinite; }
+.window-cross {
+  position: absolute; z-index: 2; left: 50%; top: 0; bottom: 0; width: max(4px, calc(var(--u) * 0.8)); margin-left: calc(var(--u) * -0.4);
+  background: #6b4a36;
+}
+.window-cross::after {
+  content: ""; position: absolute; top: 45%; left: -3000px; right: -3000px; height: max(4px, calc(var(--u) * 0.8)); background: #6b4a36;
+}
+.window-sill {
+  position: absolute; left: -4px; right: -4px; bottom: -2px; height: 5px; background: #8a6246;
+}
+
+.shop-door {
+  left: 3%; bottom: 14%; width: max(17%, 48px); height: 50%; z-index: 2;
+  background: linear-gradient(var(--wood), var(--wood-dark));
+  border: 4px solid var(--spider-black); border-radius: 10px 10px 0 0;
+  display: block; text-decoration: none;
+  transition: box-shadow 0.25s, transform 0.25s;
+}
+.shop-door::before { /* glass pane */
+  content: ""; position: absolute; inset: 22% 18% 38% 18%;
+  background: linear-gradient(#0e1530, #25365f); border: 3px solid #1a0f10; border-radius: 4px;
+}
+.shop-door::after { /* knob */
+  content: ""; position: absolute; right: 10%; top: 66%; width: 8px; height: 8px; border-radius: 50%; background: var(--candle-glow);
+}
+.shop-door-sign { position: absolute; left: 50%; top: 4%; transform: translateX(-50%); width: 92%; z-index: 2; }
+
+.hatch {
+  left: 5%; top: 15%; width: max(17%, 60px); height: 9%; z-index: 2;
+  background: linear-gradient(var(--wood), var(--wood-dark));
+  border: 3px solid var(--spider-black); border-radius: 4px;
+  display: block; text-decoration: none;
+  transition: box-shadow 0.25s, transform 0.25s;
+}
+.hatch-cord {
+  position: absolute; left: 50%; top: 100%; width: 2px; height: 70%; background: var(--ghost-white);
+  transform-origin: 50% 0; animation: swing 4s ease-in-out infinite alternate;
+}
+.hatch-sign { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); white-space: nowrap; font-size: clamp(0.62rem, 1.6cqw, 0.9rem); }
+
+.string-lights { left: 0; top: 1%; width: 100%; height: auto; z-index: 2; }
+.bulb { filter: drop-shadow(0 0 1.5px currentColor); animation: twinkle 1.7s ease-in-out infinite alternate; }
+.bulb:nth-of-type(2) { animation-delay: -0.4s; }
+.bulb:nth-of-type(3) { animation-delay: -0.9s; }
+.bulb:nth-of-type(4) { animation-delay: -0.2s; }
+.bulb:nth-of-type(5) { animation-delay: -1.2s; }
+.bulb:nth-of-type(6) { animation-delay: -0.6s; }
+.bulb:nth-of-type(7) { animation-delay: -1.5s; }
+.bulb:nth-of-type(8) { animation-delay: -0.3s; }
+
+.fan { left: 43%; top: 4.5%; width: calc(var(--u) * 13); z-index: 3; }
+.fan-rod { display: block; width: 3px; height: calc(var(--u) * 1); margin: 0 auto; background: var(--spider-black); }
+.fan-tilt { margin-top: calc(var(--u) * -3.2); transform: perspective(240px) rotateX(76deg); }
+.fan-blades { display: block; width: 100%; animation: spin 1.1s linear infinite; }
+
+.hang-bat {
+  left: var(--x); top: 4%; width: max(22px, calc(var(--u) * var(--w, 5))); z-index: 3;
+  transform-origin: 50% 0; animation: hang-sway 3.4s ease-in-out infinite alternate;
+}
+.hang-bat.late { animation-delay: -1.7s; }
+.hang-bat svg { display: block; width: 100%; height: auto; filter: drop-shadow(0 0 1px rgba(246, 242, 248, 0.6)); }
+.hang-bat .wing { transform-box: view-box; transform-origin: 30px 12px; animation: flap 2.6s ease-in-out infinite alternate; }
+
+.spider-drop { left: var(--x); top: 4%; width: max(26px, calc(var(--u) * 5)); z-index: 3; }
+.thread { display: block; width: 1.5px; margin: 0 auto; background: var(--ghost-white); height: 6%; animation: thread-drop 6s ease-in-out infinite alternate; }
+.spider { display: block; width: 100%; height: auto; animation: spider-drop 6s ease-in-out infinite alternate; filter: drop-shadow(0 0 1px rgba(246, 242, 248, 0.7)); }
+
+.rack { left: 66%; top: 14%; width: 32%; height: 38%; z-index: 2; }
+.rack-bar { position: absolute; left: 0; right: 0; top: 0; height: 5px; background: #c8bcd6; border-radius: 3px; }
+.hanger {
+  position: absolute; top: 4px; left: 4%; width: 28%;
+  transform-origin: 50% 0; animation: hanger-sway 4s ease-in-out infinite alternate;
+}
+.hanger.h2 { left: 36%; animation-delay: -1.3s; }
+.hanger.h3 { left: 68%; animation-delay: -2.6s; }
+.hanger svg { display: block; width: 100%; height: auto; }
+
+.mannequin { left: 21%; bottom: 10%; width: max(36px, calc(var(--u) * 10)); z-index: 3; transform-origin: 50% 100%; animation: sway 5s ease-in-out infinite alternate; }
+.mannequin svg { display: block; width: 100%; height: auto; }
+.mannequin-base { display: block; height: 6px; width: 70%; margin: -4px auto 0; background: #1a1018; border-radius: 3px; }
+
+.shopkeeper { z-index: 6; }
+.shopkeeper .fig { animation: breathe 3s ease-in-out infinite alternate; }
+.wave-arm { transform-box: view-box; transform-origin: 27px 36px; animation: wave 0.8s ease-in-out infinite alternate; }
+
+.counter {
+  left: 66%; right: 0; bottom: 0; height: 24%; z-index: 7;
+  background: linear-gradient(#6a4636, #3b2018);
+  border-top: 6px solid #8a6246;
+}
+.register {
+  position: absolute; bottom: 100%; right: 8%; width: 14%; height: 40%; min-height: 20px;
+  background: #1a1018; border: 2px solid var(--candle-glow); border-radius: 4px;
+}
+.jar {
+  position: absolute; bottom: 100%; width: max(18px, calc(var(--u) * 4)); height: max(22px, calc(var(--u) * 5));
+  border: 2px solid rgba(246, 242, 248, 0.7); border-radius: 30% 30% 18% 18%;
+}
+.jar.j1 { left: 6%;  background: radial-gradient(circle at 35% 35%, var(--pumpkin) 0 20%, var(--candy-purple) 21% 40%, var(--slime-green) 41% 70%, transparent 71%); }
+.jar.j2 { left: 24%; background: radial-gradient(circle at 60% 40%, var(--candle-glow) 0 22%, var(--pumpkin) 23% 55%, transparent 56%); }
+.jar.j3 { left: 42%; background: radial-gradient(circle at 40% 60%, var(--slime-green) 0 30%, var(--candy-purple) 31% 62%, transparent 63%); }
+
+.shop-dim {
+  inset: 0; z-index: 8; pointer-events: none;
+  background: radial-gradient(ellipse at 50% 45%, transparent 50%, rgba(10, 6, 16, 0.55));
+}
+
+/* ---------- 09 SCENE 3: ROOFTOPS ---------- */
+.stage-rooftops .sky { background: linear-gradient(180deg, #0a0710 0%, #1a1423 28%, #30124f 62%, #4c1585 100%); }
+.moon-big { right: auto; left: 7%; top: 7%; width: calc(var(--u) * 22); }
+.clouds { left: 0; width: 200%; pointer-events: none; background-repeat: repeat-x; animation: fog-drift 80s linear infinite; }
+.clouds-back {
+  top: 4%; height: 34%; z-index: 1; opacity: 0.85;
+  background-image:
+    radial-gradient(ellipse closest-side at 50% 50%, rgba(58, 30, 100, 0.95), rgba(58, 30, 100, 0)),
+    radial-gradient(ellipse closest-side at 50% 60%, rgba(40, 20, 74, 0.9), rgba(40, 20, 74, 0));
+  background-size: 25% 100%, 12.5% 70%;
+  background-position: 0 0, 4% 30%;
+}
+.clouds-front {
+  top: 14%; height: 26%; z-index: 1; opacity: 0.9; animation-duration: 52s;
+  background-image:
+    radial-gradient(ellipse closest-side at 50% 50%, rgba(26, 14, 52, 0.96), rgba(26, 14, 52, 0)),
+    radial-gradient(ellipse closest-side at 50% 50%, rgba(66, 36, 112, 0.7), rgba(66, 36, 112, 0));
+  background-size: 33.333% 100%, 16.666% 70%;
+  background-position: 0 0, 8% 25%;
+}
+.sky-flash { inset: 0; z-index: 2; background: var(--ghost-white); opacity: 0; pointer-events: none; animation: lightning 11s infinite; }
+.bolt {
+  left: 62%; top: 0; width: calc(var(--u) * 7); height: 36%; z-index: 2;
+  background: #fff7c8; opacity: 0;
+  clip-path: polygon(52% 0, 18% 46%, 46% 46%, 8% 100%, 82% 40%, 54% 40%, 80% 0);
+  filter: drop-shadow(0 0 8px var(--candle-glow));
+  animation: lightning 11s infinite;
+}
+.skyline-rooftops { bottom: 14%; height: 36%; background: linear-gradient(#25123f, #170c2a); z-index: 2; }
+.stage-rooftops .skyline-lights { bottom: 14%; height: 36%; z-index: 2; }
+
+.roof-back {
+  left: 0; right: 0; bottom: 0; height: 33%; z-index: 3;
+  background: #120a20;
+  clip-path: polygon(0 100%, 0 40%, 8% 40%, 8% 28%, 14% 28%, 14% 44%, 30% 44%, 30% 34%, 42% 34%, 42% 46%, 58% 46%, 58% 30%, 70% 30%, 70% 42%, 84% 42%, 84% 26%, 90% 26%, 90% 40%, 100% 40%, 100% 100%);
+}
+.chimney {
+  left: 8%; bottom: 24%; width: calc(var(--u) * 7); height: 20%; z-index: 4;
+  background: repeating-linear-gradient(0deg, #3a2a52 0 6px, #2a1d3e 6px 8px);
+  border-top: 5px solid #1a1023;
+}
+.smoke {
+  position: absolute; bottom: 100%; left: 25%; width: calc(var(--u) * 3.5); aspect-ratio: 1; border-radius: 50%;
+  background: rgba(var(--fog), 0.3); opacity: 0.25;
+  animation: smoke-rise 6s ease-out infinite;
+}
+.smoke.s2 { animation-delay: -2s; left: 40%; }
+.smoke.s3 { animation-delay: -4s; left: 15%; }
+.owl-wrap { z-index: 5; }
+.owl { display: block; width: 100%; height: auto; filter: drop-shadow(0 0 1px rgba(246, 242, 248, 0.7)); }
+.owl-eyes { transform-box: fill-box; transform-origin: center; animation: blink 6s infinite; }
+.owl { transform-origin: 50% 100%; animation: owl-look 7s ease-in-out infinite; }
+
+.vane { right: 7%; bottom: 24%; width: calc(var(--u) * 10); height: 26%; z-index: 4; }
+.vane-pole { position: absolute; left: 50%; bottom: 0; width: 3px; height: 70%; background: #0a0710; margin-left: -1.5px; }
+.vane-arrow {
+  position: absolute; left: 0; top: 4%; width: 100%; height: auto;
+  transform-origin: 50% 50%; animation: vane-swing 4s ease-in-out infinite alternate;
+  filter: drop-shadow(0 0 1px rgba(246, 242, 248, 0.7));
+}
+.bunting { left: 10%; width: 82%; top: 36%; z-index: 4; height: auto; }
+.flag { transform-box: fill-box; transform-origin: 50% 0; animation: flutter 1.3s ease-in-out infinite alternate; }
+.flag:nth-of-type(odd) { animation-delay: -0.5s; }
+.flag:nth-of-type(3n) { animation-delay: -0.9s; }
+
+.roof-front {
+  left: 0; right: 0; bottom: 0; height: 25%; z-index: 4;
+  background:
+    repeating-linear-gradient(90deg, rgba(0, 0, 0, 0.35) 0 2px, transparent 2px calc(var(--u) * 10)),
+    linear-gradient(#251836, #120a1e);
+  border-top: 6px solid #3a2a52;
+}
+
+.dancer { z-index: 6; }
+.dancer .fig { animation: dance-bounce 0.55s ease-in-out infinite alternate; }
+.dancer .leg { animation-duration: 0.55s; }
+.arm-l, .arm-r { transform-box: view-box; animation: arm-up 0.55s ease-in-out infinite alternate; }
+.arm-l { transform-origin: 14px 36px; }
+.arm-r { transform-origin: 26px 36px; animation-direction: alternate-reverse; }
+.skeleton .arm-l { animation-delay: -0.2s; }
+
+.walker-still { z-index: 6; }
+.walker-still .fig { animation: breathe 3s ease-in-out infinite alternate; }
+.walker-still .leg { animation: none; }
+.telescope {
+  position: absolute; right: 70%; top: 36%; width: 75%; height: max(5px, calc(var(--u) * 0.9));
+  background: linear-gradient(90deg, var(--ghost-white), var(--candy-purple) 40%, var(--ghost-white));
+  border-radius: 3px; transform-origin: 100% 50%; transform: rotate(33deg);
+}
+.cat-run { z-index: 5; }
+
+.balloon {
+  left: var(--x, 55%); bottom: var(--y, 36%); width: max(46px, calc(var(--u) * var(--w, 15)));
+  z-index: 3; animation: balloon-cross var(--dur, 70s) linear var(--delay, 0s) infinite;
+}
+.balloon svg { display: block; width: 100%; height: auto; animation: balloon-bob 5s ease-in-out infinite alternate; filter: drop-shadow(0 0 1px rgba(246, 242, 248, 0.5)); }
+.basket { transform-box: view-box; transform-origin: 40px 70px; animation: basket-sway 3s ease-in-out infinite alternate; }
+.balloon .wave-arm { transform-origin: 45px 90px; }
+
+.broom-fly {
+  left: var(--x, 30%); bottom: var(--y, 72%); width: max(60px, calc(var(--u) * var(--w, 16)));
+  z-index: 7; animation: broom-cross var(--dur, 20s) linear var(--delay, 0s) infinite;
+}
+.broom { display: block; width: 100%; height: auto; scale: -1 1; animation: broom-wave 2.4s ease-in-out infinite alternate; filter: drop-shadow(0 0 1px rgba(246, 242, 248, 0.7)); }
+.broom-trail {
+  position: absolute; right: 94%; top: 68%; width: 70%; height: 4px; border-radius: 3px;
+  background: linear-gradient(to left, rgba(255, 214, 10, 0.85), rgba(255, 117, 24, 0));
+  animation: flicker 1.2s infinite;
+}
+
+.fire-escape {
+  right: 1%; bottom: 0; width: max(9%, 40px); height: 34%; z-index: 7;
+  background:
+    repeating-linear-gradient(180deg, transparent 0 14px, var(--ghost-white) 14px 17px),
+    linear-gradient(90deg, var(--ghost-white) 0 12%, transparent 12% 88%, var(--ghost-white) 88% 100%);
+  opacity: 0.85; display: block; text-decoration: none; transition: opacity 0.2s, filter 0.2s;
+}
+.fire-escape-sign { position: absolute; right: 0; bottom: calc(100% + 6px); white-space: nowrap; }
+.stage-rooftops .fog-roof { bottom: -3%; height: 20%; }
+
+/* ---------- 10 SWITCHES + HOVER / FOCUS MICRO-INTERACTIONS ---------- */
+.app:has(#t-mist:checked) .fog-extra {
+  opacity: 0.75;
+  background-image:
+    radial-gradient(ellipse closest-side at 50% 60%, rgba(var(--fog), 0.7), rgba(var(--fog), 0)),
+    radial-gradient(ellipse closest-side at 50% 50%, rgba(var(--fog), 0.5), rgba(var(--fog), 0));
+  background-size: 25% 100%, 12.5% 100%;
+}
+.app:has(#t-mist:checked) .fog-back,
+.app:has(#t-mist:checked) .fog-front { opacity: 0.95; }
+
+.app:has(#t-confetti:checked) .confetti { opacity: 1; visibility: visible; }
+
+.app:has(#t-glow:checked) .stage::after { opacity: 1; }
+.app:has(#t-glow:checked) .lantern::before { opacity: 1; animation: flicker 3.4s infinite; }
+.app:has(#t-glow:checked) .lantern .face { fill: var(--candle-glow); }
+.app:has(#t-glow:checked) .lamp-head { filter: brightness(1.4); }
+
+/* Portals between scenes: lift, glow and brighten their signs */
+.stage a:hover,
+.stage a:focus-visible { box-shadow: 0 0 22px 6px rgba(255, 214, 10, 0.75); }
+.stage a:hover .door-glass { opacity: 1; }
+.stage a:hover .door-sign,
+.stage a:hover .ladder-sign,
+.stage a:hover .shop-door-sign,
+.stage a:hover .hatch-sign,
+.stage a:hover .fire-escape-sign,
+.stage a:focus-visible .door-sign,
+.stage a:focus-visible .ladder-sign,
+.stage a:focus-visible .shop-door-sign,
+.stage a:focus-visible .hatch-sign,
+.stage a:focus-visible .fire-escape-sign {
+  background: var(--pumpkin); color: var(--spider-black);
+}
+.stage a:focus-visible { outline: var(--focus-ring); outline-offset: 2px; }
+.stage a:hover .ladder, .ladder:hover, .fire-escape:hover { opacity: 1; }
+.door:hover, .shop-door:hover { transform: translateY(-2px); }
+.stage a.ladder:hover, .stage a.fire-escape:hover { box-shadow: none; filter: drop-shadow(0 0 8px var(--candle-glow)); }
+
+/* Animals notice you */
+.cat-wrap:hover .eyes ellipse { fill: var(--pumpkin); }
+.cat-wrap:hover .tail { animation-duration: 0.6s; }
+
+/* ---------- 11 RESPONSIVE (mobile-first) ---------- */
+@media (min-width: 640px) {
+  .app { padding: 0 24px 40px; }
+  .stage { aspect-ratio: 4 / 3; }
+  .sidewalk, .road { }
+  .scene-nav a { font-size: 1rem; padding: 0.4rem 1.4rem; }
+}
+
+@media (min-width: 960px) {
+  .stage { aspect-ratio: 16 / 10; }
+  .site-header { padding-top: 40px; }
+}
+
+@media (max-width: 380px) {
+  .scene-nav a { padding: 0.4rem 0.8rem; font-size: 0.88rem; }
+  .switch label { font-size: 0.88rem; }
+}
+
+/* ---------- 12 KEYFRAMES ---------- */
+@keyframes flicker {
+  0%, 18%, 22%, 62%, 66%, 100% { opacity: 1; }
+  20% { opacity: 0.6; }
+  64% { opacity: 0.75; }
+  80% { opacity: 0.88; }
+}
+@keyframes drift { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+@keyframes fog-drift { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+@keyframes scene-in { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+@keyframes twinkle { from { opacity: 0.35; } to { opacity: 1; } }
+@keyframes glow-pulse { from { filter: brightness(0.95); } to { filter: brightness(1.12); } }
+
+@keyframes walk-right { from { left: -18%; } to { left: 110%; } }
+@keyframes walk-left  { from { left: 110%; } to { left: -18%; } }
+@keyframes bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-2.5%); } }
+@keyframes step { from { transform: rotate(-24deg); } to { transform: rotate(24deg); } }
+@keyframes breathe { from { transform: translateY(0) scaleY(1); } to { transform: translateY(-0.6%) scaleY(1.012); } }
+@keyframes wag { from { transform: rotate(-18deg); } to { transform: rotate(22deg); } }
+@keyframes tail-sway { from { transform: rotate(-12deg); } to { transform: rotate(16deg); } }
+@keyframes blink { 0%, 90%, 100% { transform: scaleY(1); } 94% { transform: scaleY(0.08); } }
+@keyframes wave { from { transform: rotate(-14deg); } to { transform: rotate(22deg); } }
+@keyframes sway { from { transform: rotate(-1.5deg); } to { transform: rotate(1.5deg); } }
+@keyframes swing { from { transform: rotate(-9deg); } to { transform: rotate(9deg); } }
+@keyframes hang-sway { from { transform: rotate(-4deg); } to { transform: rotate(4deg); } }
+@keyframes hanger-sway { from { transform: rotate(-2.5deg); } to { transform: rotate(2.5deg); } }
+
+@keyframes bat-cross { from { left: -12%; } to { left: 112%; } }
+@keyframes bat-cross-rev { from { left: 112%; } to { left: -12%; } }
+@keyframes bat-wave { from { transform: translateY(-40%) rotate(-4deg); } to { transform: translateY(40%) rotate(5deg); } }
+@keyframes flap { from { transform: scaleY(1); } to { transform: scaleY(0.3); } }
+
+@keyframes drive { from { left: -38%; } to { left: 112%; } }
+@keyframes car-bounce { from { transform: translateY(0); } to { transform: translateY(-1.4px); } }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+@keyframes leaf-fall { from { top: -8%; } to { top: 104%; } }
+@keyframes leaf-sway { from { transform: translateX(-4vw) rotate(-40deg); } to { transform: translateX(5vw) rotate(150deg); } }
+@keyframes confetti-fall {
+  from { background-position: 0 0, 40px 0, 20px 0, 70px 0, 10px 0; }
+  to   { background-position: 0 120px, 40px 150px, 20px 100px, 70px 130px, 10px 180px; }
+}
+
+@keyframes rain-fall-a { to { background-position: 0 40px; } }
+@keyframes rain-fall-b { to { background-position: 0 70px; } }
+@keyframes lightning {
+  0%, 85%, 91%, 100% { opacity: 0; }
+  86% { opacity: 0.32; }
+  87.5% { opacity: 0; }
+  89% { opacity: 0.38; }
+}
+@keyframes taxi-pass { from { left: 112%; } to { left: -52%; } }
+
+@keyframes thread-drop { from { height: 6%; } to { height: 120%; } }
+@keyframes spider-drop { from { transform: translateY(0) rotate(-3deg); } to { transform: translateY(0) rotate(3deg); } }
+@keyframes smoke-rise {
+  0% { transform: translate(0, 0) scale(0.6); opacity: 0.4; }
+  100% { transform: translate(calc(var(--u) * 5), calc(var(--u) * -12)) scale(2.2); opacity: 0; }
+}
+@keyframes owl-look { 0%, 40%, 100% { transform: rotate(0); } 50%, 60% { transform: rotate(-5deg); } 70%, 90% { transform: rotate(5deg); } }
+@keyframes vane-swing { from { transform: rotate(-30deg); } to { transform: rotate(30deg); } }
+@keyframes flutter { from { transform: skewX(-10deg) rotate(-6deg); } to { transform: skewX(10deg) rotate(6deg); } }
+
+@keyframes dance-bounce { from { transform: translateY(0); } to { transform: translateY(-5%); } }
+@keyframes arm-up { from { transform: rotate(-28deg); } to { transform: rotate(32deg); } }
+
+@keyframes balloon-cross { from { left: -22%; } to { left: 112%; } }
+@keyframes balloon-bob { from { transform: translateY(-6px); } to { transform: translateY(8px); } }
+@keyframes basket-sway { from { transform: rotate(-4deg); } to { transform: rotate(4deg); } }
+@keyframes broom-cross { from { left: -22%; } to { left: 112%; } }
+@keyframes broom-wave { from { transform: translateY(-30%) rotate(-5deg); } to { transform: translateY(30%) rotate(6deg); } }
+
+/* ---------- 13 REDUCED MOTION ----------
+   Every animation stops. Each moving thing already has a sensible resting
+   position in its base rule (left / top / --x), so the scenes still read
+   as complete, static illustrations. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+    scroll-behavior: auto !important;
+  }
+  .confetti { background-position: 0 0, 40px 40px, 20px 60px, 70px 20px, 10px 90px; }
+}
